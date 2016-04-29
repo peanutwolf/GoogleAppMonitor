@@ -1,0 +1,29 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:ap="http://schemas.android.com/apk/res-auto" android:layout_height="fill_parent" android:layout_width="fill_parent"
+    android:orientation="vertical"
+    android:weightSum="1">
+
+
+    <com.peanutwolf.googleappmonitor.Models.DynamicXYPlot
+        style="@style/simple_xy"
+        android:id="@+id/dynamicXYPlot"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        androidplot.renderMode="use_background_thread"
+        android:layout_above="@+id/btn_start_trek"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true" />
+
+    <Button
+        style="?android:attr/buttonStyleSmall"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:text="Start trek"
+        android:id="@+id/btn_start_trek"
+        android:layout_gravity="center_horizontal"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true" />
+
+
+</RelativeLayout>
