@@ -42,8 +42,8 @@ public class ShakeSensorService extends Service implements SensorEventListener, 
     private SensorManager mSensorMgr;
     private LocationSensorManager mLocationManager;
     private Intent intentBroadcast;
-    private static final int TIME_THRESHOLD = 1;
-    private static final int TIME_THRESHOLD_DB = 5000;
+    private static final int TIME_THRESHOLD = 10;
+    private static final int TIME_THRESHOLD_DB = 100;
     private long mLastTime;
     private long mLastTime_db;
     private HandlerThread thread;
@@ -152,7 +152,7 @@ public class ShakeSensorService extends Service implements SensorEventListener, 
         }
         try{
             Handler handler = new Handler(thread.getLooper());
-            supported = mSensorMgr.registerListener(this, mSensorMgr.getDefaultSensor(Sensor.TYPE_ACCELEROMETER), SensorManager.SENSOR_DELAY_FASTEST, handler);
+            supported = mSensorMgr.registerListener(this, mSensorMgr.getDefaultSensor(Sensor.TYPE_ACCELEROMETER), SensorManager.SENSOR_DELAY_UI, handler);
         }
         catch (Exception e){
             e.printStackTrace();

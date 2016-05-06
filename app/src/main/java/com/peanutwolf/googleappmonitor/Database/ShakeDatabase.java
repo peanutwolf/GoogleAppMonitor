@@ -40,7 +40,6 @@ public class ShakeDatabase extends SQLiteOpenHelper {
 
     @Override
     public void onCreate(SQLiteDatabase db) {
-        db.execSQL("DROP TABLE IF EXISTS " +  TABLE_SHAKE);
         db.execSQL(TABLE_CREATE);
     }
 

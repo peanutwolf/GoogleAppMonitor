@@ -8,12 +8,13 @@
     <application
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
-        android:label="@string/app_name">
+        android:label="@string/app_name"
+        android:theme="@style/Theme.AppCompat.Light.NoActionBar">
         <activity
             android:name=".MainActivity"
             android:label="@string/app_name"
             android:launchMode="singleInstance"
-            android:theme="@style/Theme.AppCompat.NoActionBar">
+            android:theme="@style/Theme.AppCompat.Light.NoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -22,7 +23,8 @@
         </activity>
 
         <activity
-            android:name=".Database.AndroidDatabaseManager" />
+            android:name=".Database.AndroidDatabaseManager"
+            android:theme="@style/Theme.AppCompat.Light.NoActionBar"/>
 
         <activity
             android:name=".DynamicPlotXY"
@@ -30,7 +32,13 @@
 
         <activity
             android:name=".MapsActivity"
-            android:label="@string/title_activity_maps"></activity>
+            android:label="@string/title_activity_maps"
+            android:theme="@style/Theme.AppCompat.Light"/>
+
+        <activity
+            android:name=".ExportDataTestActivity"
+            android:theme="@style/Theme.AppCompat.NoActionBar"/>
+
         <service
             android:name=".Services.ShakeSensorService"
             android:enabled="true"
@@ -43,14 +51,7 @@
         <provider
             android:name=".Database.ShakeDBContentProvider"
             android:authorities="com.peanutwolf.googleappmonitor.Database" />
-        <!--
-             The API key for Google Maps-based APIs is defined as a string resource.
-             (See the file "res/values/google_maps_api.xml").
-             Note that the API key is linked to the encryption key used to sign the APK.
-             You need a different API key for each encryption key, including the release key that is used to
-             sign the APK for publishing.
-             You can define the keys for the debug and release targets in src/debug/ and src/release/. 
-        -->
+
         <meta-data
             android:name="com.google.android.geo.API_KEY"
             android:value="@string/google_maps_key" />

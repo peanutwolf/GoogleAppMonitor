@@ -102,6 +102,8 @@ public class ShakeDBContentProvider extends ContentProvider {
 
     @Override
     public int delete(Uri uri, String selection, String[] selectionArgs) {
+        SQLiteDatabase sqlDB = database.getWritableDatabase();
+        database.onUpgrade(sqlDB, 1, 1);
         return 0;
     }
 

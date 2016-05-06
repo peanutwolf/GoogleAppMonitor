@@ -64,7 +64,7 @@ public class DataSaverService extends Service {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        mContentResolver.query(ShakeDBContentProvider.CONTENT_URI, null,null,null,null);
+        mContentResolver.delete(ShakeDBContentProvider.CONTENT_URI, null,null);
         registerReceiver(receiver, new IntentFilter(ShakeSensorService.BROADCAST_SHAKE_SENSOR), null, mSaverHandler);
         return START_STICKY;
     }

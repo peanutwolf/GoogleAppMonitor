@@ -10,7 +10,6 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.IBinder;
-import android.support.v7.app.ActionBarActivity;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
@@ -33,6 +32,7 @@ public class DynamicPlotXY extends AppCompatActivity implements DynamicDataSourc
 
     private final static int DOMAIN_WIDTH = 100;
     public static final String TAG = DynamicPlotXY.class.getName();
+    private static boolean mDBSaverStarted = false;
     private XYPlot dynamicPlot;
     private Button startTrekButton;
     private SimpleDynamicSeries sine1Series;
@@ -50,7 +50,7 @@ public class DynamicPlotXY extends AppCompatActivity implements DynamicDataSourc
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_dynamic_plot_xy);
 
-        startTrekButton = (Button) findViewById(R.id.btn_start_trek);
+        startTrekButton = (Button) findViewById(R.id.btn_record_trek);
         startTrekButton.setOnClickListener(this);
         dynamicPlot = (XYPlot) findViewById(R.id.dynamicXYPlot);
         this.customizeDynamicPlotView(dynamicPlot);
@@ -67,14 +67,6 @@ public class DynamicPlotXY extends AppCompatActivity implements DynamicDataSourc
         dynamicPlot.setRangeBoundaries(-5, 5, BoundaryMode.FIXED);
 
         dynamicPlot.setDomainBoundaries(0, DOMAIN_WIDTH - 1, BoundaryMode.FIXED);
-
-        dynamicPlot.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent dbmanager = new Intent(getApplicationContext(), AndroidDatabaseManager.class);
-                startActivity(dbmanager);
-            }
-        });
 
         plotUpdater = new HandlerThread("PlotUpdater");
         plotUpdater.start();
@@ -181,7 +173,16 @@ public class DynamicPlotXY extends AppCompatActivity implements DynamicDataSourc
 
     @Override
     public void onClick(View v) {
-        startService(mDataSaverServiceIntent);
+        if(mDBSaverStarted == false){
+            mDBSaverStarted = true;
+            startService(mDataSaverServiceIntent);
+            startTrekButton.setText("Stop recording");
+        }else{
+            mDBSaverStarted = false;
+            stopService(mDataSaverServiceIntent);
+            startTrekButton.setText("Start recording");
+        }
+
     }
 }
 
