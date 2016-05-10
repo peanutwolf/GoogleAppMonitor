@@ -17,10 +17,16 @@ public class ShakeDatabase extends SQLiteOpenHelper {
     public static final String TABLE_SHAKE = "shake";
     public static final String COLUMN_ID = "_id";
     public static final String COLUMN_ROUTEID = "routeID";
-    public static final String COLUMN_AXISX = "axsix";
+    public static final String COLUMN_AXISACCELX = "axisaccelx";
+    public static final String COLUMN_AXISACCELY = "axisaccely";
+    public static final String COLUMN_AXISACCELZ = "axisaccelz";
+    public static final String COLUMN_AXISROTATX = "axisrotatx";
+    public static final String COLUMN_AXISROTATY = "axisrotaty";
+    public static final String COLUMN_AXISROTATZ = "axisrotatz";
     public static final String COLUMN_LONGITUDE = "longitude";
     public static final String COLUMN_LATITUDE = "latitude";
     public static final String COLUMN_SPEED = "speed";
+    public static final String COLUMN_TIMESTAMP = "timestamp";
 
     private static final String DATABASE_NAME = "shakemeter.db";
     private static final int DATABASE_VERSION = 1;
@@ -28,10 +34,16 @@ public class ShakeDatabase extends SQLiteOpenHelper {
             + TABLE_SHAKE + "("
             + COLUMN_ID + " integer primary key autoincrement, "
             + COLUMN_ROUTEID + " text not null, "
-            + COLUMN_AXISX + " text not null, "
-            + COLUMN_LONGITUDE + " text not null,"
+            + COLUMN_AXISACCELX + " text not null, "
+            + COLUMN_AXISACCELY + " text not null, "
+            + COLUMN_AXISACCELZ + " text not null, "
+            + COLUMN_AXISROTATX + " text not null, "
+            + COLUMN_AXISROTATY + " text not null, "
+            + COLUMN_AXISROTATZ + " text not null, "
+            + COLUMN_LONGITUDE + " text not null, "
             + COLUMN_LATITUDE + " text not null, "
-            + COLUMN_SPEED + " text not null"
+            + COLUMN_SPEED + " text not null, "
+            + COLUMN_TIMESTAMP + " text not null"
             +");";
 
     public ShakeDatabase(Context context) {

@@ -59,6 +59,12 @@ public class DynamicPlotXY extends AppCompatActivity implements DynamicDataSourc
         formatter1.getLinePaint().setStrokeJoin(Paint.Join.ROUND);
         formatter1.getLinePaint().setStrokeWidth(5);
 
+        dynamicPlot.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startActivity(new Intent(getApplicationContext(), AndroidDatabaseManager.class));
+            }
+        });
 
         mSensorData = new RangedLinkedList<>(DOMAIN_WIDTH);
 

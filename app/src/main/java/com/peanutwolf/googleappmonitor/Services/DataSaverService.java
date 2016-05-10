@@ -43,15 +43,17 @@ public class DataSaverService extends Service {
         @Override
         public void onReceive(Context context, Intent intent) {
             ContentValues values = new ContentValues();
-            String axisx = intent.getFloatExtra(ShakeDatabase.COLUMN_AXISX, 0.0F) + "";
-            String latitude = intent.getDoubleExtra(ShakeDatabase.COLUMN_LATITUDE, 0) + "";
-            String longitude = intent.getDoubleExtra(ShakeDatabase.COLUMN_LONGITUDE, 0) + "";
-            String speed = intent.getFloatExtra(ShakeDatabase.COLUMN_SPEED, 0.0F) + "";
             values.put(ShakeDatabase.COLUMN_ROUTEID, "1");
-            values.put(ShakeDatabase.COLUMN_AXISX, axisx);
-            values.put(ShakeDatabase.COLUMN_LATITUDE, latitude);
-            values.put(ShakeDatabase.COLUMN_LONGITUDE, longitude);
-            values.put(ShakeDatabase.COLUMN_SPEED, speed);
+            values.put(ShakeDatabase.COLUMN_AXISACCELX, intent.getDoubleExtra(ShakeDatabase.COLUMN_AXISACCELX, 0.0) + "");
+            values.put(ShakeDatabase.COLUMN_AXISACCELY, intent.getDoubleExtra(ShakeDatabase.COLUMN_AXISACCELY, 0.0) + "");
+            values.put(ShakeDatabase.COLUMN_AXISACCELZ, intent.getDoubleExtra(ShakeDatabase.COLUMN_AXISACCELZ, 0.0) + "");
+            values.put(ShakeDatabase.COLUMN_AXISROTATX, intent.getDoubleExtra(ShakeDatabase.COLUMN_AXISROTATX, 0.0) + "");
+            values.put(ShakeDatabase.COLUMN_AXISROTATY, intent.getDoubleExtra(ShakeDatabase.COLUMN_AXISROTATY, 0.0) + "");
+            values.put(ShakeDatabase.COLUMN_AXISROTATZ, intent.getDoubleExtra(ShakeDatabase.COLUMN_AXISROTATZ, 0.0) + "");
+            values.put(ShakeDatabase.COLUMN_LATITUDE, intent.getDoubleExtra(ShakeDatabase.COLUMN_LATITUDE, 0) + "");
+            values.put(ShakeDatabase.COLUMN_LONGITUDE, intent.getDoubleExtra(ShakeDatabase.COLUMN_LONGITUDE, 0) + "");
+            values.put(ShakeDatabase.COLUMN_SPEED, intent.getFloatExtra(ShakeDatabase.COLUMN_SPEED, 0.0F) + "");
+            values.put(ShakeDatabase.COLUMN_TIMESTAMP, intent.getLongExtra(ShakeDatabase.COLUMN_TIMESTAMP, 0L) + "");
             mContentResolver.insert(ShakeDBContentProvider.CONTENT_URI, values);
         }
     };

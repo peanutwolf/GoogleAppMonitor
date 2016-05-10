@@ -113,7 +113,7 @@ public class ExportDataTestActivity extends AppCompatActivity implements View.On
                 jsonArray.put(jsonRecord);
                 cursor.moveToNext();
             }
-            jsonObject.put("Accelerometer", jsonArray);
+            jsonObject.put("Data", jsonArray);
             jsonObject.put("Version", "1.0");
             cursor.close();
         }

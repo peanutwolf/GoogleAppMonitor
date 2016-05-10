@@ -6,7 +6,7 @@ android {
     defaultConfig {
         applicationId "com.peanutwolf.googleappmonitor"
         minSdkVersion 15
-        targetSdkVersion 21
+        targetSdkVersion 19
         versionCode 1
         versionName "1.0"
         testApplicationId 'com.peanutwolf.googleapptest'
@@ -33,4 +33,5 @@ dependencies {
     compile 'com.google.android.gms:play-services:8.4.0'
     compile 'com.google.android.gms:play-services-location:8.4.0'
     compile 'com.android.support:support-v4:23.2.1'
+    compile 'com.squareup.okhttp3:okhttp:3.2.0'
 }

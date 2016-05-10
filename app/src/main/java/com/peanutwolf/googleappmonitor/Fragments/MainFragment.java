@@ -2,28 +2,17 @@ package com.peanutwolf.googleappmonitor.Fragments;
 
 
 import android.app.Fragment;
-import android.content.ContentResolver;
 import android.content.Intent;
-import android.database.Cursor;
+import android.content.pm.ActivityInfo;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
-import com.peanutwolf.googleappmonitor.Database.ShakeDBContentProvider;
 import com.peanutwolf.googleappmonitor.DynamicPlotXY;
 import com.peanutwolf.googleappmonitor.ExportDataTestActivity;
 import com.peanutwolf.googleappmonitor.MapsActivity;
 import com.peanutwolf.googleappmonitor.R;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-import java.io.IOException;
-import okhttp3.MediaType;
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
-import okhttp3.RequestBody;
-import okhttp3.Response;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -43,6 +32,9 @@ public class MainFragment extends Fragment implements View.OnClickListener {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
+
+        getActivity().setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+
         View view = inflater.inflate(R.layout.fragment_main, container, false);
 
         mViewMapButton = (Button)view.findViewById(R.id.btn_view_main);
@@ -51,7 +43,7 @@ public class MainFragment extends Fragment implements View.OnClickListener {
         mStartRoutingButton = (Button)view.findViewById(R.id.btn_start_main);
         mStartRoutingButton.setOnClickListener(this);
 
-        mSettingsButton = (Button)view.findViewById(R.id.btn_settings_main);
+        mSettingsButton = (Button)view.findViewById(R.id.btn_export_main);
         mSettingsButton.setOnClickListener(this);
 
         return view;
@@ -70,7 +62,7 @@ public class MainFragment extends Fragment implements View.OnClickListener {
                 intent = new Intent(getActivity(), DynamicPlotXY.class);
                 startActivity(intent);
                 break;
-            case R.id.btn_settings_main:
+            case R.id.btn_export_main:
                 intent = new Intent(getActivity(), ExportDataTestActivity.class);
                 startActivity(intent);
                 break;
