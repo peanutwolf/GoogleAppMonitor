@@ -7,6 +7,6 @@ import java.util.List;
  */
 public interface ShakeServiceDataSource {
 
-    List<Number> getAxisXData();
+    List<Number> getAccelerationData();
 
 }

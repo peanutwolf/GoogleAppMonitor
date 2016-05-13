@@ -27,13 +27,8 @@
             android:theme="@style/Theme.AppCompat.Light.NoActionBar"/>
 
         <activity
-            android:name=".DynamicPlotXY"
+            android:name=".DynamicPlotXYActivity"
             android:theme="@style/Theme.AppCompat.NoActionBar"/>
-
-        <activity
-            android:name=".MapsActivity"
-            android:label="@string/title_activity_maps"
-            android:theme="@style/Theme.AppCompat.Light"/>
 
         <activity
             android:name=".ExportDataTestActivity"

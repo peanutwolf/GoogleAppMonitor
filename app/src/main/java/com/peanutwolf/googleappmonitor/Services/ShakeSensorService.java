@@ -117,7 +117,7 @@ public class ShakeSensorService extends Service implements SensorEventListener, 
     }
 
     @Override
-    public List<Number> getAxisXData() {
+    public List<Number> getAccelerationData() {
         synchronized (mSensorData) {
             return new LinkedList<>(mSensorData);
         }

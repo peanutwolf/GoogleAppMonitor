@@ -11,20 +11,15 @@ import java.util.List;
 public class DynamicDataSourceLoop implements Handler.Callback{
     public static final String TAG = DynamicDataSourceLoop.class.getName();
     private Handler mResponseHandler;
-    private RangedLinkedList<Float > mSensorData;
     private DynamicDataSourceLoop.iCallback mPlotCallback;
 
     public interface iCallback{
-        public void onUpdate(List<Float> data);
+        void onUpdate();
     }
 
-    public DynamicDataSourceLoop(Handler responceHandler, DynamicDataSourceLoop.iCallback callback){
-        mResponseHandler = responceHandler;
+    public DynamicDataSourceLoop(Handler responseHandler, DynamicDataSourceLoop.iCallback callback){
+        mResponseHandler = responseHandler;
         mPlotCallback = callback;
-    }
-
-    public void setSensorDataPipe(RangedLinkedList<Float> list){
-        mSensorData = list;
     }
 
     @Override
@@ -35,7 +30,7 @@ public class DynamicDataSourceLoop implements Handler.Callback{
             mResponseHandler.post(new Runnable() {
                 @Override
                 public void run() {
-                    mPlotCallback.onUpdate(mSensorData);
+                    mPlotCallback.onUpdate();
                 }
             });
             try {

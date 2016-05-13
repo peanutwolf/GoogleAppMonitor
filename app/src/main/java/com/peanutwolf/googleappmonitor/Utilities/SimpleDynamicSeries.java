@@ -18,7 +18,7 @@ public class SimpleDynamicSeries implements XYSeries {
 
     public void update(){
         if(mDataSource != null)
-            mAxisX = mDataSource.getAxisXData();
+            mAxisX = mDataSource.getAccelerationData();
     }
 
     @Override

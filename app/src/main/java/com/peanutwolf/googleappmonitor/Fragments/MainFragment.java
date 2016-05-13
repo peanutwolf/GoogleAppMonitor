@@ -9,9 +9,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
-import com.peanutwolf.googleappmonitor.DynamicPlotXY;
+import com.peanutwolf.googleappmonitor.DynamicPlotXYActivity;
 import com.peanutwolf.googleappmonitor.ExportDataTestActivity;
-import com.peanutwolf.googleappmonitor.MapsActivity;
 import com.peanutwolf.googleappmonitor.R;
 
 /**
@@ -55,11 +54,9 @@ public class MainFragment extends Fragment implements View.OnClickListener {
 
         switch (v.getId()){
             case R.id.btn_view_main:
-                intent = new Intent(getActivity(), MapsActivity.class);
-                startActivity(intent);
-                break;
+
             case R.id.btn_start_main:
-                intent = new Intent(getActivity(), DynamicPlotXY.class);
+                intent = new Intent(getActivity(), DynamicPlotXYActivity.class);
                 startActivity(intent);
                 break;
             case R.id.btn_export_main:
