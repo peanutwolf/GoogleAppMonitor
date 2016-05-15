@@ -1,4 +1,4 @@
-package com.peanutwolf.googleappmonitor.Services;
+package com.peanutwolf.googleappmonitor.Services.Interfaces;
 
 import java.util.List;
 

@@ -87,7 +87,6 @@ public class DynamicPlotXY extends AppCompatActivity implements DynamicDataSourc
         Log.d(TAG, "onStart");
         super.onStart();
         DynamicDataSourceLoop dataSourceLoop = new DynamicDataSourceLoop(mUiUpdater, this);
-        dataSourceLoop.setSensorDataPipe((RangedLinkedList) mSensorData);
         plotHandler = new Handler(plotUpdater.getLooper(), dataSourceLoop);
         plotHandler.obtainMessage().sendToTarget();
     }
@@ -126,7 +125,7 @@ public class DynamicPlotXY extends AppCompatActivity implements DynamicDataSourc
 
 
     @Override
-    public void onUpdate(List<Float> data) {
+    public void onUpdate() {
         dynamicPlot.redraw();
     }
 

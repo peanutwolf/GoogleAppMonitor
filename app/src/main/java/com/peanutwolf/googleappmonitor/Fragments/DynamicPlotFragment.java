@@ -66,7 +66,6 @@ public class DynamicPlotFragment extends Fragment implements DynamicDataSourceLo
         sine1Series.setDataSource(((MainActivity)getActivity()));
         ((DynamicXYPlotModel)dynamicPlot).addSeries(sine1Series, formatter1);
         dynamicPlot.setRangeBoundaries(-5, 5, BoundaryMode.FIXED);
-
         dynamicPlot.setDomainBoundaries(0, DOMAIN_WIDTH - 1, BoundaryMode.FIXED);
 
         plotUpdater = new HandlerThread("PlotUpdater");

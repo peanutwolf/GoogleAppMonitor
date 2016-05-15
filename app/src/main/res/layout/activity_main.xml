@@ -6,7 +6,7 @@
     android:weightSum="3">
 
     <fragment
-        android:id="@+id/map"
+        android:id="@+id/map_main"
         android:name="com.google.android.gms.maps.SupportMapFragment"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -14,7 +14,7 @@
         tools:context="com.peanutwolf.googleappmonitor.MainActivity" />
 
     <fragment
-        android:id="@+id/dynamicPlot"
+        android:id="@+id/dyn_plot_main"
         android:name="com.peanutwolf.googleappmonitor.Fragments.DynamicPlotFragment"
         android:layout_width="match_parent"
         android:layout_height="match_parent"

@@ -14,6 +14,7 @@ import android.os.IBinder;
 
 import com.peanutwolf.googleappmonitor.Database.ShakeDatabase;
 import com.peanutwolf.googleappmonitor.Models.ShakePointModel;
+import com.peanutwolf.googleappmonitor.Services.Interfaces.ShakeServiceDataSource;
 import com.peanutwolf.googleappmonitor.Utilities.LocationSensorManager;
 import com.peanutwolf.googleappmonitor.Utilities.RangedLinkedList;
 
@@ -25,7 +26,7 @@ public class ShakeSensorService extends Service implements SensorEventListener, 
     public static final String BROADCAST_SHAKE_SENSOR = "com.peanutwolf.shakesensorservice";
     private static final  int DOMAIN_WIDTH = 100;
     private SensorManager mSensorMgr;
-    private LocationSensorManager mLocationManager;
+   // private LocationSensorManager mLocationManager;
     private Intent intentBroadcast;
     private static final int TIME_THRESHOLD = 10;
     private static final int TIME_THRESHOLD_DB = 1;
@@ -54,7 +55,7 @@ public class ShakeSensorService extends Service implements SensorEventListener, 
     public void onCreate() {
         super.onCreate();
         mSensorData = new RangedLinkedList<>(DOMAIN_WIDTH);
-        mLocationManager = new LocationSensorManager(getApplicationContext());
+        //mLocationManager = new LocationSensorManager(getApplicationContext());
 
         mUpdaterThread = new Thread(new SupportSensorUpdater());
         mUpdaterThread.start();
@@ -76,7 +77,7 @@ public class ShakeSensorService extends Service implements SensorEventListener, 
         mUpdaterThread.interrupt();
         if(mShakeStarted)
             mSensorMgr.unregisterListener(this);
-        mLocationManager.stopLocationManager();
+        //mLocationManager.stopLocationManager();
     }
 
     @Override
@@ -109,9 +110,9 @@ public class ShakeSensorService extends Service implements SensorEventListener, 
         intentBroadcast.putExtra(ShakeDatabase.COLUMN_AXISROTATX, mShakePointModel.getAxisRotationX());
         intentBroadcast.putExtra(ShakeDatabase.COLUMN_AXISROTATY, mShakePointModel.getAxisRotationY());
         intentBroadcast.putExtra(ShakeDatabase.COLUMN_AXISROTATZ, mShakePointModel.getAxisRotationZ());
-        intentBroadcast.putExtra(ShakeDatabase.COLUMN_LATITUDE, mLocationManager.getCurrentLatitude());
-        intentBroadcast.putExtra(ShakeDatabase.COLUMN_LONGITUDE, mLocationManager.getCurrentLongitude());
-        intentBroadcast.putExtra(ShakeDatabase.COLUMN_SPEED, mLocationManager.getCurrentSpeed());
+//        intentBroadcast.putExtra(ShakeDatabase.COLUMN_LATITUDE, mLocationManager.getCurrentLatitude());
+//        intentBroadcast.putExtra(ShakeDatabase.COLUMN_LONGITUDE, mLocationManager.getCurrentLongitude());
+//        intentBroadcast.putExtra(ShakeDatabase.COLUMN_SPEED, mLocationManager.getCurrentSpeed());
         intentBroadcast.putExtra(ShakeDatabase.COLUMN_TIMESTAMP, mShakePointModel.getCurrentTimestamp());
         sendBroadcast(intentBroadcast);
     }
@@ -132,7 +133,7 @@ public class ShakeSensorService extends Service implements SensorEventListener, 
 
 
     private boolean startLocationManger() {
-        mLocationManager.startLocationManager();
+//        mLocationManager.startLocationManager();
         return true;
     }
 

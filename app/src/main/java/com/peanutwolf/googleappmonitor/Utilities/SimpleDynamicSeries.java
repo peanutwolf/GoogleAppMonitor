@@ -1,7 +1,7 @@
 package com.peanutwolf.googleappmonitor.Utilities;
 
 import com.androidplot.xy.XYSeries;
-import com.peanutwolf.googleappmonitor.Services.ShakeServiceDataSource;
+import com.peanutwolf.googleappmonitor.Services.Interfaces.ShakeServiceDataSource;
 
 import java.util.List;
 
