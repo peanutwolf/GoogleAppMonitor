@@ -95,13 +95,13 @@ public class LocationGoogleService extends Service implements GoogleApiClient.Co
         mLocation = location;
     }
 
-    @Nullable
+    @NonNull
     @Override
     public LatLng getLastKnownLatLng(){
         if(mLocation != null)
             return new LatLng(mLocation.getLatitude(), mLocation.getLongitude());
         else
-            return null;
+            return new LatLng(59.9405331, 30.3848492); // TODO: Test Location(get from Content Provider)
     }
 
     public class LocationServiceBinder extends Binder {

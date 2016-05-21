@@ -4,6 +4,7 @@ import android.content.Context;
 import android.util.AttributeSet;
 
 import com.androidplot.Plot;
+import com.androidplot.xy.BoundaryMode;
 import com.androidplot.xy.XYPlot;
 import com.androidplot.xy.XYSeries;
 import com.androidplot.xy.XYSeriesFormatter;
@@ -31,8 +32,13 @@ public class DynamicXYPlotModel extends XYPlot {
 
     @Override
     public void redraw() {
-        if(mSeries != null)
+        int average = 0;
+        if(mSeries != null) {
             mSeries.update();
+            average = mSeries.getAverage();
+            this.setRangeBoundaries(average-5, average+5, BoundaryMode.FIXED);
+        }
         super.redraw();
     }
+
 }

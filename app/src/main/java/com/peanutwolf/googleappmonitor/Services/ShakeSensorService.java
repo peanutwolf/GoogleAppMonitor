@@ -15,7 +15,6 @@ import android.os.IBinder;
 import com.peanutwolf.googleappmonitor.Database.ShakeDatabase;
 import com.peanutwolf.googleappmonitor.Models.ShakePointModel;
 import com.peanutwolf.googleappmonitor.Services.Interfaces.ShakeServiceDataSource;
-import com.peanutwolf.googleappmonitor.Utilities.LocationSensorManager;
 import com.peanutwolf.googleappmonitor.Utilities.RangedLinkedList;
 
 import java.util.LinkedList;
@@ -26,7 +25,6 @@ public class ShakeSensorService extends Service implements SensorEventListener, 
     public static final String BROADCAST_SHAKE_SENSOR = "com.peanutwolf.shakesensorservice";
     private static final  int DOMAIN_WIDTH = 100;
     private SensorManager mSensorMgr;
-   // private LocationSensorManager mLocationManager;
     private Intent intentBroadcast;
     private static final int TIME_THRESHOLD = 10;
     private static final int TIME_THRESHOLD_DB = 1;
@@ -34,7 +32,7 @@ public class ShakeSensorService extends Service implements SensorEventListener, 
     private long mLastTime_db;
     private HandlerThread thread;
     private final Binder mBinder = new ShakeSensorBinder();
-    private List<Number> mSensorData;
+    private List<Number> mSensorViewData;
     private boolean mShakeStarted = false;
     private Thread mUpdaterThread;
     private ShakePointModel mShakePointModel;
@@ -54,9 +52,7 @@ public class ShakeSensorService extends Service implements SensorEventListener, 
     @Override
     public void onCreate() {
         super.onCreate();
-        mSensorData = new RangedLinkedList<>(DOMAIN_WIDTH);
-        //mLocationManager = new LocationSensorManager(getApplicationContext());
-
+        mSensorViewData = new RangedLinkedList<>(DOMAIN_WIDTH);
         mUpdaterThread = new Thread(new SupportSensorUpdater());
         mUpdaterThread.start();
 
@@ -66,7 +62,6 @@ public class ShakeSensorService extends Service implements SensorEventListener, 
 
         mShakePointModel = new ShakePointModel();
 
-        startLocationManger();
     }
 
 
@@ -77,7 +72,6 @@ public class ShakeSensorService extends Service implements SensorEventListener, 
         mUpdaterThread.interrupt();
         if(mShakeStarted)
             mSensorMgr.unregisterListener(this);
-        //mLocationManager.stopLocationManager();
     }
 
     @Override
@@ -87,8 +81,8 @@ public class ShakeSensorService extends Service implements SensorEventListener, 
         mShakePointModel.fillModelFromEvent(event);
 
         if ((now - mLastTime) > TIME_THRESHOLD) {
-            synchronized (mSensorData) {
-                mSensorData.add(mShakePointModel.getAccelerationValue());
+            synchronized (mSensorViewData) {
+                mSensorViewData.add(mShakePointModel.getAccelerationValue());
             }
             mLastTime = now;
         }
@@ -119,9 +113,14 @@ public class ShakeSensorService extends Service implements SensorEventListener, 
 
     @Override
     public List<Number> getAccelerationData() {
-        synchronized (mSensorData) {
-            return new LinkedList<>(mSensorData);
+        synchronized (mSensorViewData) {
+            return new LinkedList<>(mSensorViewData);
         }
+    }
+
+    @Override
+    public int getAverageAccelerationData() {
+        return ((RangedLinkedList)mSensorViewData).getAverage();
     }
 
 
@@ -129,12 +128,6 @@ public class ShakeSensorService extends Service implements SensorEventListener, 
         public ShakeSensorService getService() {
             return ShakeSensorService.this;
         }
-    }
-
-
-    private boolean startLocationManger() {
-//        mLocationManager.startLocationManager();
-        return true;
     }
 
 
@@ -166,12 +159,12 @@ public class ShakeSensorService extends Service implements SensorEventListener, 
         @Override
         public void run() {
             while (!Thread.currentThread().isInterrupted()) {
-                synchronized (mSensorData) {
+                synchronized (mSensorViewData) {
                     long now = System.currentTimeMillis();
 
                     if ((now - mLastTime) > TIME_THRESHOLD) {
-                        if(!mSensorData.isEmpty())
-                            mSensorData.add(mShakePointModel.getAccelerationValue());
+                        if(!mSensorViewData.isEmpty())
+                            mSensorViewData.add(mShakePointModel.getAccelerationValue());
                         mLastTime = now;
                     }
                 }

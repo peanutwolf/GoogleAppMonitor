@@ -21,6 +21,20 @@ public class SimpleDynamicSeries implements XYSeries {
             mAxisX = mDataSource.getAccelerationData();
     }
 
+    public int getAverage(){
+        if(mDataSource != null)
+            return mDataSource.getAverageAccelerationData();
+        return 0;
+
+//        if(mAxisX == null || mAxisX.size() == 0)
+//            return 0;
+//        int average = 0;
+//        for(Number n : mAxisX){
+//            average += n.intValue();
+//        }
+//        return average/mAxisX.size();
+    }
+
     @Override
     public int size() {
         if (mAxisX != null)

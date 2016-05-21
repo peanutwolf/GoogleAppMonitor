@@ -9,4 +9,6 @@ public interface ShakeServiceDataSource {
 
     List<Number> getAccelerationData();
 
+    int getAverageAccelerationData();
+
 }

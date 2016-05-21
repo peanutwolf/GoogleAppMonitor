@@ -24,7 +24,7 @@
 
         <activity
             android:name=".Database.AndroidDatabaseManager"
-            android:theme="@style/Theme.AppCompat.Light.NoActionBar"/>
+            android:theme="@style/Theme.AppCompat.Light"/>
 
         <activity
             android:name=".DynamicPlotXYActivity"
@@ -40,6 +40,10 @@
             android:exported="true" />
         <service
             android:name=".Services.DataSaverService"
+            android:enabled="true"
+            android:exported="true" />
+        <service
+            android:name=".Services.LocationGoogleService"
             android:enabled="true"
             android:exported="true" />
 

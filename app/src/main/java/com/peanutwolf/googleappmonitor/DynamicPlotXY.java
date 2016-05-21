@@ -28,21 +28,19 @@ import com.peanutwolf.googleappmonitor.Utilities.SimpleDynamicSeries;
 
 import java.util.List;
 
-public class DynamicPlotXY extends AppCompatActivity implements DynamicDataSourceLoop.iCallback, View.OnClickListener {
+public class DynamicPlotXY extends AppCompatActivity implements DynamicDataSourceLoop.iCallback{
 
     private final static int DOMAIN_WIDTH = 100;
     public static final String TAG = DynamicPlotXY.class.getName();
     private static boolean mDBSaverStarted = false;
     private XYPlot dynamicPlot;
-    private Button startTrekButton;
     private SimpleDynamicSeries sine1Series;
     private Handler mUiUpdater;
-    private List<Float> mSensorData;
+    private Handler plotHandler;
     private HandlerThread plotUpdater;
     private Intent mShakeServiceIntent;
     private Intent mDataSaverServiceIntent;
     private ShakeSensorService mShakeSensorService;
-    private Handler plotHandler;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -50,8 +48,6 @@ public class DynamicPlotXY extends AppCompatActivity implements DynamicDataSourc
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_dynamic_plot_xy);
 
-        startTrekButton = (Button) findViewById(R.id.btn_record_trek);
-        startTrekButton.setOnClickListener(this);
         dynamicPlot = (XYPlot) findViewById(R.id.dynamicXYPlot);
         this.customizeDynamicPlotView(dynamicPlot);
         LineAndPointFormatter formatter1 = new LineAndPointFormatter(
@@ -66,12 +62,10 @@ public class DynamicPlotXY extends AppCompatActivity implements DynamicDataSourc
             }
         });
 
-        mSensorData = new RangedLinkedList<>(DOMAIN_WIDTH);
 
         sine1Series = new SimpleDynamicSeries();
         ((DynamicXYPlot)dynamicPlot).addSeries(sine1Series, formatter1);
         dynamicPlot.setRangeBoundaries(-5, 5, BoundaryMode.FIXED);
-
         dynamicPlot.setDomainBoundaries(0, DOMAIN_WIDTH - 1, BoundaryMode.FIXED);
 
         plotUpdater = new HandlerThread("PlotUpdater");
@@ -176,18 +170,5 @@ public class DynamicPlotXY extends AppCompatActivity implements DynamicDataSourc
         dynamicPlot.getLayoutManager().remove(dynamicPlot.getRangeLabelWidget());
     }
 
-    @Override
-    public void onClick(View v) {
-        if(mDBSaverStarted == false){
-            mDBSaverStarted = true;
-            startService(mDataSaverServiceIntent);
-            startTrekButton.setText("Stop recording");
-        }else{
-            mDBSaverStarted = false;
-            stopService(mDataSaverServiceIntent);
-            startTrekButton.setText("Start recording");
-        }
-
-    }
 }
 

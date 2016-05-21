@@ -5,14 +5,24 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.HandlerThread;
 import android.os.IBinder;
 import android.support.v4.app.FragmentActivity;
+import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
+import android.view.View;
+import android.widget.Button;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.peanutwolf.googleappmonitor.Services.DataSaverService;
@@ -20,11 +30,12 @@ import com.peanutwolf.googleappmonitor.Services.Interfaces.LocationServiceDataSo
 import com.peanutwolf.googleappmonitor.Services.LocationGoogleService;
 import com.peanutwolf.googleappmonitor.Services.ShakeSensorService;
 import com.peanutwolf.googleappmonitor.Services.Interfaces.ShakeServiceDataSource;
+import com.peanutwolf.googleappmonitor.Utilities.DynamicDataSourceLoop;
 
 import java.util.List;
 
 
-public class MainActivity extends FragmentActivity  implements OnMapReadyCallback, ShakeServiceDataSource {
+public class MainActivity extends AppCompatActivity implements OnMapReadyCallback, ShakeServiceDataSource, DynamicDataSourceLoop.iCallback {
     public static final String TAG = MainActivity.class.getName();
     private GoogleMap mMap;
     private Intent mShakeServiceIntent;
@@ -32,6 +43,9 @@ public class MainActivity extends FragmentActivity  implements OnMapReadyCallbac
     private ShakeSensorService mShakeSensorService;
     private LocationServiceDataSource mLocationServiceDataSource;
     private Intent mLocationGoogleServiceIntent;
+    private HandlerThread mapsUpdater;
+    private Handler mUiUpdater;
+    private Handler mapsHandler;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -47,16 +61,31 @@ public class MainActivity extends FragmentActivity  implements OnMapReadyCallbac
                 (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map_main);
         mapFragment.getMapAsync(this);
 
+
+        mapsUpdater = new HandlerThread("PlotUpdater");
+        mapsUpdater.start();
+        mUiUpdater = new Handler();
+
+        Toolbar myToolbar = (Toolbar) findViewById(R.id.toolbar_main);
+        setSupportActionBar(myToolbar);
+
         return;
     }
 
+    @Override
+    protected void onStart() {
+        super.onStart();
+        DynamicDataSourceLoop dataSourceLoop = new DynamicDataSourceLoop(mUiUpdater, this);
+        mapsHandler = new Handler(mapsUpdater.getLooper(), dataSourceLoop);
+        mapsHandler.obtainMessage().sendToTarget();
+    }
 
     @Override
     public void onResume() {
         Log.d(TAG, "onResume");
         super.onResume();
-        bindService(mShakeServiceIntent, mShakeConnector, Context.BIND_AUTO_CREATE);
         bindService(mLocationGoogleServiceIntent, mLocationConnector, Context.BIND_AUTO_CREATE);
+        bindService(mShakeServiceIntent, mShakeConnector, Context.BIND_AUTO_CREATE);
     }
 
 
@@ -69,6 +98,12 @@ public class MainActivity extends FragmentActivity  implements OnMapReadyCallbac
         stopService(mDataSaverServiceIntent);
     }
 
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        mapsUpdater.interrupt();
+        mapsUpdater.quit();
+    }
 
     ServiceConnection mShakeConnector = new ServiceConnection(){
         @Override
@@ -97,7 +132,8 @@ public class MainActivity extends FragmentActivity  implements OnMapReadyCallbac
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
-        mMap.moveCamera(CameraUpdateFactory.newLatLng(mLocationServiceDataSource.getLastKnownLatLng()));
+        mMap.setMyLocationEnabled(true);
+        mMap.getUiSettings().setMyLocationButtonEnabled(true);
     }
 
     @Override
@@ -106,5 +142,42 @@ public class MainActivity extends FragmentActivity  implements OnMapReadyCallbac
             return mShakeSensorService.getAccelerationData();
         else
             return null;
+    }
+
+    @Override
+    public int getAverageAccelerationData() {
+        if(mShakeSensorService != null)
+            return mShakeSensorService.getAverageAccelerationData();
+        else
+            return 0;
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.menu_main, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.action_write_trek:
+                return true;
+            case R.id.action_export_data:
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+
+        }
+    }
+
+    @Override
+    public void onUpdate() {
+        if(mLocationServiceDataSource != null) {
+//            CameraPosition cameraPosition = new CameraPosition.Builder().target(mLocationServiceDataSource.getLastKnownLatLng()).zoom(12).build();
+//            mMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
+        }
+
     }
 }

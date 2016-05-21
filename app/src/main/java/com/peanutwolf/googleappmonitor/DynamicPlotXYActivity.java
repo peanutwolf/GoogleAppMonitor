@@ -28,13 +28,12 @@ import com.peanutwolf.googleappmonitor.Utilities.SimpleDynamicSeries;
 
 import java.util.List;
 
-public class DynamicPlotXYActivity extends FragmentActivity implements DynamicDataSourceLoop.iCallback, View.OnClickListener {
+public class DynamicPlotXYActivity extends FragmentActivity implements DynamicDataSourceLoop.iCallback {
 
     private final static int DOMAIN_WIDTH = 100;
     public static final String TAG = DynamicPlotXYActivity.class.getName();
     private static boolean mDBSaverStarted = false;
     private XYPlot dynamicPlot;
-    private Button startTrekButton;
     private SimpleDynamicSeries sine1Series;
     private Handler mUiUpdater;
     private List<Float> mSensorData;
@@ -50,8 +49,6 @@ public class DynamicPlotXYActivity extends FragmentActivity implements DynamicDa
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_dynamic_plot_xy);
 
-        startTrekButton = (Button) findViewById(R.id.btn_record_trek);
-        startTrekButton.setOnClickListener(this);
         dynamicPlot = (XYPlot) findViewById(R.id.dynamicXYPlot);
         this.customizeDynamicPlotView(dynamicPlot);
         LineAndPointFormatter formatter1 = new LineAndPointFormatter(
@@ -87,7 +84,6 @@ public class DynamicPlotXYActivity extends FragmentActivity implements DynamicDa
         Log.d(TAG, "onStart");
         super.onStart();
         DynamicDataSourceLoop dataSourceLoop = new DynamicDataSourceLoop(mUiUpdater, this);
-        dataSourceLoop.setSensorDataPipe((RangedLinkedList) mSensorData);
         plotHandler = new Handler(plotUpdater.getLooper(), dataSourceLoop);
         plotHandler.obtainMessage().sendToTarget();
     }
@@ -126,7 +122,7 @@ public class DynamicPlotXYActivity extends FragmentActivity implements DynamicDa
 
 
     @Override
-    public void onUpdate(List<Float> data) {
+    public void onUpdate() {
         dynamicPlot.redraw();
     }
 
@@ -177,18 +173,5 @@ public class DynamicPlotXYActivity extends FragmentActivity implements DynamicDa
         dynamicPlot.getLayoutManager().remove(dynamicPlot.getRangeLabelWidget());
     }
 
-    @Override
-    public void onClick(View v) {
-        if(mDBSaverStarted == false){
-            mDBSaverStarted = true;
-            startService(mDataSaverServiceIntent);
-            startTrekButton.setText("Stop recording");
-        }else{
-            mDBSaverStarted = false;
-            stopService(mDataSaverServiceIntent);
-            startTrekButton.setText("Start recording");
-        }
-
-    }
 }
 

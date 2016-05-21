@@ -1,5 +1,7 @@
 package com.peanutwolf.googleappmonitor.Services.Interfaces;
 
+import android.support.annotation.NonNull;
+
 import com.google.android.gms.maps.model.LatLng;
 
 /**
@@ -8,6 +10,7 @@ import com.google.android.gms.maps.model.LatLng;
 
 public interface LocationServiceDataSource {
 
+    @NonNull
     LatLng getLastKnownLatLng();
 
 }
