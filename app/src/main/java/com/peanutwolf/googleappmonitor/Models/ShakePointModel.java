@@ -3,6 +3,8 @@ package com.peanutwolf.googleappmonitor.Models;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 
+import com.google.android.gms.maps.model.LatLng;
+
 import java.util.Date;
 
 /**
@@ -46,6 +48,11 @@ public class ShakePointModel {
 
     public double getCurrentLatitude() {
         return mCurrentLatitude;
+    }
+
+    public void setCurrentLatLng(LatLng latLng){
+        this.mCurrentLatitude = latLng.latitude;
+        this.mCurrentLongitude = latLng.longitude;
     }
 
     public void setCurrentLatitude(double currentLatitude) {

@@ -8,28 +8,20 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.IBinder;
-import android.support.v4.app.FragmentActivity;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.view.View;
-import android.widget.Button;
-
-import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
-import com.google.android.gms.maps.model.CameraPosition;
-import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.MarkerOptions;
 import com.peanutwolf.googleappmonitor.Services.DataSaverService;
 import com.peanutwolf.googleappmonitor.Services.Interfaces.LocationServiceDataSource;
+import com.peanutwolf.googleappmonitor.Services.Interfaces.ShakeServiceDataSource;
 import com.peanutwolf.googleappmonitor.Services.LocationGoogleService;
 import com.peanutwolf.googleappmonitor.Services.ShakeSensorService;
-import com.peanutwolf.googleappmonitor.Services.Interfaces.ShakeServiceDataSource;
 import com.peanutwolf.googleappmonitor.Utilities.DynamicDataSourceLoop;
 
 import java.util.List;
@@ -163,6 +155,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.action_write_trek:
+                mShakeSensorService.setAllowDataSaving(true);
                 return true;
             case R.id.action_export_data:
                 return true;

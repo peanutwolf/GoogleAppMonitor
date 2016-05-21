@@ -1,8 +1,10 @@
 package com.peanutwolf.googleappmonitor.Services;
 
 import android.app.Service;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.ServiceConnection;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
@@ -14,6 +16,7 @@ import android.os.IBinder;
 
 import com.peanutwolf.googleappmonitor.Database.ShakeDatabase;
 import com.peanutwolf.googleappmonitor.Models.ShakePointModel;
+import com.peanutwolf.googleappmonitor.Services.Interfaces.LocationServiceDataSource;
 import com.peanutwolf.googleappmonitor.Services.Interfaces.ShakeServiceDataSource;
 import com.peanutwolf.googleappmonitor.Utilities.RangedLinkedList;
 
@@ -22,10 +25,8 @@ import java.util.List;
 
 public class ShakeSensorService extends Service implements SensorEventListener, ShakeServiceDataSource {
     public static final String TAG = ShakeSensorService.class.getName();
-    public static final String BROADCAST_SHAKE_SENSOR = "com.peanutwolf.shakesensorservice";
     private static final  int DOMAIN_WIDTH = 100;
     private SensorManager mSensorMgr;
-    private Intent intentBroadcast;
     private static final int TIME_THRESHOLD = 10;
     private static final int TIME_THRESHOLD_DB = 1;
     private long mLastTime;
@@ -36,18 +37,18 @@ public class ShakeSensorService extends Service implements SensorEventListener, 
     private boolean mShakeStarted = false;
     private Thread mUpdaterThread;
     private ShakePointModel mShakePointModel;
+    private LocationServiceDataSource mLocationServiceDataSource;
+    private DataSaverService mDataSaverSource;
+    private Intent mLocationGoogleServiceIntent;
+    private Intent mDataSaverServiceIntent;
+    private boolean mAllowSaving = false;
+
 
     @Override
     public IBinder onBind(Intent intent) {
-        mShakeStarted = startShakeSensorListening();
         return mBinder;
     }
 
-    @Override
-    public int onStartCommand(Intent intent, int flags, int startId) {
-        mShakeStarted = startShakeSensorListening();
-        return START_STICKY;
-    }
 
     @Override
     public void onCreate() {
@@ -58,10 +59,15 @@ public class ShakeSensorService extends Service implements SensorEventListener, 
 
         thread = new HandlerThread("SensorLoop");
         thread.start();
-        intentBroadcast = new Intent(BROADCAST_SHAKE_SENSOR);
 
         mShakePointModel = new ShakePointModel();
+        mShakeStarted = startShakeSensorListening();
 
+        mLocationGoogleServiceIntent = new Intent(getApplicationContext(), LocationGoogleService.class);
+        mDataSaverServiceIntent = new Intent(getApplicationContext(), DataSaverService.class);
+
+        bindService(mLocationGoogleServiceIntent, mLocationConnector, Context.BIND_AUTO_CREATE);
+        bindService(mDataSaverServiceIntent, mDataSaverConnector, Context.BIND_AUTO_CREATE);
     }
 
 
@@ -72,6 +78,7 @@ public class ShakeSensorService extends Service implements SensorEventListener, 
         mUpdaterThread.interrupt();
         if(mShakeStarted)
             mSensorMgr.unregisterListener(this);
+        unbindService(mLocationConnector);
     }
 
     @Override
@@ -79,6 +86,7 @@ public class ShakeSensorService extends Service implements SensorEventListener, 
         long now = System.currentTimeMillis();
 
         mShakePointModel.fillModelFromEvent(event);
+        mShakePointModel.setCurrentLatLng(mLocationServiceDataSource.getLastKnownLatLng());
 
         if ((now - mLastTime) > TIME_THRESHOLD) {
             synchronized (mSensorViewData) {
@@ -98,17 +106,12 @@ public class ShakeSensorService extends Service implements SensorEventListener, 
     }
 
     void writeToDB(){
-        intentBroadcast.putExtra(ShakeDatabase.COLUMN_AXISACCELX, mShakePointModel.getAxisAccelerationX());
-        intentBroadcast.putExtra(ShakeDatabase.COLUMN_AXISACCELY, mShakePointModel.getAxisAccelerationY());
-        intentBroadcast.putExtra(ShakeDatabase.COLUMN_AXISACCELZ, mShakePointModel.getAxisAccelerationZ());
-        intentBroadcast.putExtra(ShakeDatabase.COLUMN_AXISROTATX, mShakePointModel.getAxisRotationX());
-        intentBroadcast.putExtra(ShakeDatabase.COLUMN_AXISROTATY, mShakePointModel.getAxisRotationY());
-        intentBroadcast.putExtra(ShakeDatabase.COLUMN_AXISROTATZ, mShakePointModel.getAxisRotationZ());
-//        intentBroadcast.putExtra(ShakeDatabase.COLUMN_LATITUDE, mLocationManager.getCurrentLatitude());
-//        intentBroadcast.putExtra(ShakeDatabase.COLUMN_LONGITUDE, mLocationManager.getCurrentLongitude());
-//        intentBroadcast.putExtra(ShakeDatabase.COLUMN_SPEED, mLocationManager.getCurrentSpeed());
-        intentBroadcast.putExtra(ShakeDatabase.COLUMN_TIMESTAMP, mShakePointModel.getCurrentTimestamp());
-        sendBroadcast(intentBroadcast);
+        if(mAllowSaving == true)
+            mDataSaverSource.saveShakePoint(mShakePointModel);
+    }
+
+    public void setAllowDataSaving(boolean permission){
+        mAllowSaving = permission;
     }
 
     @Override
@@ -130,6 +133,29 @@ public class ShakeSensorService extends Service implements SensorEventListener, 
         }
     }
 
+    ServiceConnection mLocationConnector = new ServiceConnection(){
+        @Override
+        public void onServiceConnected(ComponentName name, IBinder service) {
+            mLocationServiceDataSource = ((LocationGoogleService.LocationServiceBinder)service).getService();
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName name) {
+
+        }
+    };
+
+    ServiceConnection mDataSaverConnector = new ServiceConnection(){
+        @Override
+        public void onServiceConnected(ComponentName name, IBinder service) {
+            mDataSaverSource = ((DataSaverService.DataSaverBinder)service).getService();
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName name) {
+
+        }
+    };
 
     private boolean startShakeSensorListening(){
         boolean supported = false;
