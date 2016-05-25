@@ -4,20 +4,26 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Environment;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 
 import com.peanutwolf.googleappmonitor.Database.ShakeDBContentProvider;
+import com.peanutwolf.googleappmonitor.Database.ShakeDatabase;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.w3c.dom.Text;
 
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 
 import okhttp3.MediaType;
@@ -69,6 +75,55 @@ public class ExportDataTestActivity extends AppCompatActivity implements View.On
         task.execute(url);
     }
 
+    private void exportToFile() {
+
+        SQLiteDatabase sqldb = new ShakeDatabase(this.getApplicationContext()).getReadableDatabase(); //My Database class
+        Cursor c = null;
+
+        try {
+            c = sqldb.rawQuery("select * from shake", null);
+            int rowcount = 0;
+            int colcount = 0;
+            File sdCardDir = Environment.getExternalStorageDirectory();
+            String filename = "MyBackUp.csv";
+            // the name of the file to export with
+            File saveFile = new File(sdCardDir, filename);
+            FileWriter fw = new FileWriter(saveFile);
+            BufferedWriter bw = new BufferedWriter(fw);
+            rowcount = c.getCount();
+            colcount = c.getColumnCount();
+            if (rowcount > 0) {
+                c.moveToFirst();
+                for (int i = 0; i < colcount; i++) {
+                    if (i != colcount - 1) {
+                        bw.write(c.getColumnName(i) + ",");
+                    } else {
+                        bw.write(c.getColumnName(i));
+                    }
+                }
+                bw.newLine();
+                for (int i = 0; i < rowcount; i++) {
+                    c.moveToPosition(i);
+                    for (int j = 0; j < colcount; j++) {
+                        if (j != colcount - 1)
+                            bw.write(c.getString(j) + ",");
+                        else
+                            bw.write(c.getString(j));
+                    }
+                    bw.newLine();
+                }
+                bw.flush();
+            }
+        } catch (Exception ex) {
+            if (sqldb.isOpen()) {
+                sqldb.close();
+            }
+        } finally {
+        }
+
+    }
+
+
     class SendTestDataTask extends AsyncTask<String, Void, Boolean>{
 
         @Override
@@ -87,6 +142,7 @@ public class ExportDataTestActivity extends AppCompatActivity implements View.On
         @Override
         protected void onPostExecute(Boolean aBoolean) {
             super.onPostExecute(aBoolean);
+            exportToFile();
             mButtonSend.setText("Send to Server");
         }
     }

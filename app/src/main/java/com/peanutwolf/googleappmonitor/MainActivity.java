@@ -17,6 +17,7 @@ import android.view.MenuItem;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.peanutwolf.googleappmonitor.Database.ShakeDBContentProvider;
 import com.peanutwolf.googleappmonitor.Services.DataSaverService;
 import com.peanutwolf.googleappmonitor.Services.Interfaces.LocationServiceDataSource;
 import com.peanutwolf.googleappmonitor.Services.Interfaces.ShakeServiceDataSource;
@@ -155,9 +156,11 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.action_write_trek:
+                getContentResolver().delete(ShakeDBContentProvider.CONTENT_URI, null,null);
                 mShakeSensorService.setAllowDataSaving(true);
                 return true;
             case R.id.action_export_data:
+                startActivity(new Intent(this.getApplicationContext(), ExportDataTestActivity.class));
                 return true;
             default:
                 return super.onOptionsItemSelected(item);

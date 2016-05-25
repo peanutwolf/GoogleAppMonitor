@@ -79,6 +79,7 @@ public class ShakeSensorService extends Service implements SensorEventListener, 
         if(mShakeStarted)
             mSensorMgr.unregisterListener(this);
         unbindService(mLocationConnector);
+        unbindService(mDataSaverConnector);
     }
 
     @Override
@@ -86,7 +87,8 @@ public class ShakeSensorService extends Service implements SensorEventListener, 
         long now = System.currentTimeMillis();
 
         mShakePointModel.fillModelFromEvent(event);
-        mShakePointModel.setCurrentLatLng(mLocationServiceDataSource.getLastKnownLatLng());
+        if(mLocationServiceDataSource != null)
+            mShakePointModel.setCurrentLatLng(mLocationServiceDataSource.getLastKnownLatLng());
 
         if ((now - mLastTime) > TIME_THRESHOLD) {
             synchronized (mSensorViewData) {
