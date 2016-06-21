@@ -84,11 +84,11 @@ public class ExportDataTestActivity extends AppCompatActivity implements View.On
             c = sqldb.rawQuery("select * from shake", null);
             int rowcount = 0;
             int colcount = 0;
-            File sdCardDir = Environment.getExternalStorageDirectory();
-            String filename = "MyBackUp.csv";
+            File dataDirectory = getExternalFilesDir(null).getParentFile();
+            String filename = "ShakeData.csv";
             // the name of the file to export with
-            File saveFile = new File(sdCardDir, filename);
-            FileWriter fw = new FileWriter(saveFile);
+            File saveFile = new File(dataDirectory, filename);
+            FileWriter fw = new FileWriter(saveFile, false);
             BufferedWriter bw = new BufferedWriter(fw);
             rowcount = c.getCount();
             colcount = c.getColumnCount();
@@ -115,10 +115,11 @@ public class ExportDataTestActivity extends AppCompatActivity implements View.On
                 bw.flush();
             }
         } catch (Exception ex) {
+            ex.printStackTrace();
+        } finally {
             if (sqldb.isOpen()) {
                 sqldb.close();
             }
-        } finally {
         }
 
     }
@@ -178,12 +179,18 @@ public class ExportDataTestActivity extends AppCompatActivity implements View.On
     }
 
     boolean post(String url, String json) throws IOException {
-        RequestBody body = RequestBody.create(JSON, json);
-        Request request = new Request.Builder()
+        boolean isSuccessful = false;
+        try{
+            RequestBody body = RequestBody.create(JSON, json);
+            Request request = new Request.Builder()
                 .url(url)
                 .post(body)
                 .build();
-        Response response = client.newCall(request).execute();
-        return response.isSuccessful();
+            Response response = client.newCall(request).execute();
+            isSuccessful = response.isSuccessful();
+        }catch (java.lang.IllegalArgumentException e){
+            e.printStackTrace();
+        }
+        return isSuccessful;
     }
 }
