@@ -34,3 +34,5 @@ captures/
 
 # Idea Files
 .idea/
+
+*.iml
