@@ -1,1 +1,3 @@
 /build
+.androidplot-core.iml
+.build.gradle

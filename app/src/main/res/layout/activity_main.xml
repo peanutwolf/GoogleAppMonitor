@@ -21,7 +21,20 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_weight="2"
-        tools:context="com.peanutwolf.googleappmonitor.MainActivity" />
+        tools:context="com.peanutwolf.googleappmonitor.MainActivity" >
+
+        <Button
+            android:id="@+id/btn_ride_main"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center|bottom"
+            android:text="@string/str_ride_it"
+            android:padding="10dp"
+            android:paddingStart="25dp"
+            android:paddingEnd="25dp"
+            android:layout_marginBottom="25dp" />
+
+    </fragment>
 
 
     <fragment

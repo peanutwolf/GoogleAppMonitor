@@ -116,8 +116,6 @@ public class DynamicPlotXY extends AppCompatActivity implements DynamicDataSourc
         plotUpdater.quit();
     }
 
-
-
     @Override
     public void onUpdate() {
         dynamicPlot.redraw();

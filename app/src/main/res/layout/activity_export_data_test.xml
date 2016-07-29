@@ -17,4 +17,12 @@
         android:id="@+id/btn_send_test_data"
         android:layout_gravity="center_horizontal" />
 
+    <Button
+        style="?android:attr/buttonStyleSmall"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Save to Disk"
+        android:id="@+id/btn_save_test_data"
+        android:layout_gravity="center_horizontal" />
+
 </LinearLayout>

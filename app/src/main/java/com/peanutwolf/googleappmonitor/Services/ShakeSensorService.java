@@ -91,7 +91,7 @@ public class ShakeSensorService extends Service implements SensorEventListener, 
             mShakePointModel.setCurrentLatLng(mLocationServiceDataSource.getLastKnownLatLng());
 
         if ((now - mLastTime) > TIME_THRESHOLD) {
-            synchronized (mSensorViewData) {
+            synchronized(mSensorViewData){
                 mSensorViewData.add(mShakePointModel.getAccelerationValue());
             }
             mLastTime = now;
@@ -114,6 +114,10 @@ public class ShakeSensorService extends Service implements SensorEventListener, 
 
     public void setAllowDataSaving(boolean permission){
         mAllowSaving = permission;
+    }
+
+    public boolean isDataSavingAllowed(){
+        return mAllowSaving;
     }
 
     @Override
@@ -201,7 +205,6 @@ public class ShakeSensorService extends Service implements SensorEventListener, 
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
-
             }
         }
     }

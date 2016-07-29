@@ -1,13 +1,15 @@
 package com.peanutwolf.googleappmonitor;
 
+import android.app.Application;
 import android.content.ContentResolver;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.os.Environment;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.Button;
@@ -19,12 +21,14 @@ import com.peanutwolf.googleappmonitor.Database.ShakeDatabase;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.w3c.dom.Text;
 
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
 
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
@@ -38,7 +42,8 @@ import okhttp3.Response;
 public class ExportDataTestActivity extends AppCompatActivity implements View.OnClickListener {
 
     private TextView mTextURL;
-    private Button mButtonSend;
+    private Button mButtonSendHost;
+    private Button mButtonSaveToDisk;
     private SharedPreferences sharedPref;
 
     @Override
@@ -47,9 +52,11 @@ public class ExportDataTestActivity extends AppCompatActivity implements View.On
         setContentView(R.layout.activity_export_data_test);
 
         mTextURL = (TextView) findViewById(R.id.txt_test_url);
-        mButtonSend = (Button) findViewById(R.id.btn_send_test_data);
+        mButtonSendHost = (Button) findViewById(R.id.btn_send_test_data);
+        mButtonSaveToDisk = (Button) findViewById(R.id.btn_save_test_data);
 
-        mButtonSend.setOnClickListener(this);
+        mButtonSendHost.setOnClickListener(this);
+        mButtonSaveToDisk.setOnClickListener(this);
 
         sharedPref = getPreferences(Context.MODE_PRIVATE);
 
@@ -62,6 +69,31 @@ public class ExportDataTestActivity extends AppCompatActivity implements View.On
 
     @Override
     public void onClick(View v) {
+
+        if(v.getId() == R.id.btn_save_test_data){
+            AlertDialog alertDialog = new AlertDialog.Builder(ExportDataTestActivity.this).create();
+            alertDialog.setTitle("File export");
+            alertDialog.setButton(AlertDialog.BUTTON_NEUTRAL, "OK",
+                    new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int which) {
+                            dialog.dismiss();
+                        }
+                    });
+            try {
+                DateFormat df = new SimpleDateFormat("EEEddMMMHHmmss");
+                String filename = df.format(Calendar.getInstance().getTime()) + ".csv";
+                exportToFile(filename);
+                alertDialog.setMessage("Exported to " + filename);
+            } catch (IOException e) {
+                e.printStackTrace();
+                alertDialog.setMessage("File export failed");
+            }finally {
+                alertDialog.show();
+            }
+
+            return;
+        }
+
         String url = mTextURL.getText().toString();
         if(url.isEmpty()){
             return;
@@ -70,26 +102,21 @@ public class ExportDataTestActivity extends AppCompatActivity implements View.On
             editor.putString(getString(R.string.saved_test_url), url);
             editor.commit();
         }
-        mButtonSend.setText("Loading...");
+        mButtonSendHost.setText("Loading...");
         SendTestDataTask task = new SendTestDataTask();
         task.execute(url);
     }
 
-    private void exportToFile() {
+    private void exportToFile(String filename) throws IOException {
 
         SQLiteDatabase sqldb = new ShakeDatabase(this.getApplicationContext()).getReadableDatabase(); //My Database class
         Cursor c = null;
 
         try {
             c = sqldb.rawQuery("select * from shake", null);
-            int rowcount = 0;
-            int colcount = 0;
-            File dataDirectory = getExternalFilesDir(null).getParentFile();
-            String filename = "ShakeData.csv";
-            // the name of the file to export with
-            File saveFile = new File(dataDirectory, filename);
-            FileWriter fw = new FileWriter(saveFile, false);
-            BufferedWriter bw = new BufferedWriter(fw);
+            int rowcount;
+            int colcount;
+            BufferedWriter bw = getBufferedWriterStreamToDisk(filename);
             rowcount = c.getCount();
             colcount = c.getColumnCount();
             if (rowcount > 0) {
@@ -116,6 +143,7 @@ public class ExportDataTestActivity extends AppCompatActivity implements View.On
             }
         } catch (Exception ex) {
             ex.printStackTrace();
+            throw ex;
         } finally {
             if (sqldb.isOpen()) {
                 sqldb.close();
@@ -124,6 +152,20 @@ public class ExportDataTestActivity extends AppCompatActivity implements View.On
 
     }
 
+    private BufferedWriter getBufferedWriterStreamToDisk(String filename){
+        File dataDirectory = getExternalFilesDir(null).getParentFile();
+        // the name of the file to export with
+        File saveFile = new File(dataDirectory, filename);
+        FileWriter fw = null;
+        try {
+            fw = new FileWriter(saveFile, false);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        BufferedWriter bw = new BufferedWriter(fw);
+
+        return bw;
+    }
 
     class SendTestDataTask extends AsyncTask<String, Void, Boolean>{
 
@@ -143,8 +185,7 @@ public class ExportDataTestActivity extends AppCompatActivity implements View.On
         @Override
         protected void onPostExecute(Boolean aBoolean) {
             super.onPostExecute(aBoolean);
-            exportToFile();
-            mButtonSend.setText("Send to Server");
+            mButtonSendHost.setText("Send to Server");
         }
     }
 

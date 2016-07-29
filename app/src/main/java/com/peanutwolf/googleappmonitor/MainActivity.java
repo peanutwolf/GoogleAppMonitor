@@ -14,6 +14,8 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.Button;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
@@ -24,11 +26,9 @@ import com.peanutwolf.googleappmonitor.Services.Interfaces.ShakeServiceDataSourc
 import com.peanutwolf.googleappmonitor.Services.LocationGoogleService;
 import com.peanutwolf.googleappmonitor.Services.ShakeSensorService;
 import com.peanutwolf.googleappmonitor.Utilities.DynamicDataSourceLoop;
-
 import java.util.List;
 
-
-public class MainActivity extends AppCompatActivity implements OnMapReadyCallback, ShakeServiceDataSource, DynamicDataSourceLoop.iCallback {
+public class MainActivity extends AppCompatActivity implements OnMapReadyCallback, ShakeServiceDataSource, DynamicDataSourceLoop.iCallback, View.OnClickListener {
     public static final String TAG = MainActivity.class.getName();
     private GoogleMap mMap;
     private Intent mShakeServiceIntent;
@@ -39,12 +39,17 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     private HandlerThread mapsUpdater;
     private Handler mUiUpdater;
     private Handler mapsHandler;
+    private Button mRideItButton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         setContentView(R.layout.activity_main);
+
+        mRideItButton = (Button) findViewById(R.id.btn_ride_main);
+
+        mRideItButton.setOnClickListener(this);
 
         mDataSaverServiceIntent = new Intent(getApplicationContext(), DataSaverService.class);
         mShakeServiceIntent = new Intent(getApplicationContext(), ShakeSensorService.class);
@@ -53,7 +58,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         SupportMapFragment mapFragment =
                 (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map_main);
         mapFragment.getMapAsync(this);
-
 
         mapsUpdater = new HandlerThread("PlotUpdater");
         mapsUpdater.start();
@@ -80,7 +84,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         bindService(mLocationGoogleServiceIntent, mLocationConnector, Context.BIND_AUTO_CREATE);
         bindService(mShakeServiceIntent, mShakeConnector, Context.BIND_AUTO_CREATE);
     }
-
 
     @Override
     public void onPause() {
@@ -164,16 +167,26 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
-
         }
     }
 
     @Override
     public void onUpdate() {
-        if(mLocationServiceDataSource != null) {
+        if(mLocationServiceDataSource != null){
 //            CameraPosition cameraPosition = new CameraPosition.Builder().target(mLocationServiceDataSource.getLastKnownLatLng()).zoom(12).build();
 //            mMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
         }
+    }
 
+    @Override
+    public void onClick(View v) {
+        if(mShakeSensorService.isDataSavingAllowed()){
+            mShakeSensorService.setAllowDataSaving(false);
+            mRideItButton.setText(getResources().getString(R.string.str_ride_it));
+        }else{
+            getContentResolver().delete(ShakeDBContentProvider.CONTENT_URI, null,null);
+            mShakeSensorService.setAllowDataSaving(true);
+            mRideItButton.setText(getResources().getString(R.string.str_stop_it));
+        }
     }
 }

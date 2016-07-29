@@ -54,7 +54,7 @@ public class DynamicPlotFragment extends Fragment implements DynamicDataSourceLo
         formatter1.getLinePaint().setStrokeJoin(Paint.Join.ROUND);
         formatter1.getLinePaint().setStrokeWidth(5);
 
-        if(BuildConfig.DEBUG) {
+        if(BuildConfig.DEBUG){
             dynamicPlot.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
