@@ -36,7 +36,6 @@ public class DynamicPlotXYActivity extends FragmentActivity implements DynamicDa
     private XYPlot dynamicPlot;
     private SimpleDynamicSeries sine1Series;
     private Handler mUiUpdater;
-    private List<Float> mSensorData;
     private HandlerThread plotUpdater;
     private Intent mShakeServiceIntent;
     private Intent mDataSaverServiceIntent;
@@ -62,8 +61,6 @@ public class DynamicPlotXYActivity extends FragmentActivity implements DynamicDa
                 startActivity(new Intent(getApplicationContext(), AndroidDatabaseManager.class));
             }
         });
-
-        mSensorData = new RangedLinkedList<>(DOMAIN_WIDTH);
 
         sine1Series = new SimpleDynamicSeries();
         ((DynamicXYPlotModel)dynamicPlot).addSeries(sine1Series, formatter1);

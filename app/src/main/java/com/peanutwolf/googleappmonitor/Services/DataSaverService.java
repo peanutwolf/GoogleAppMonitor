@@ -47,8 +47,8 @@ public class DataSaverService extends Service {
         values.put(ShakeDatabase.COLUMN_AXISROTATX, mModel.getAxisRotationX() + "");
         values.put(ShakeDatabase.COLUMN_AXISROTATY, mModel.getAxisRotationY() + "");
         values.put(ShakeDatabase.COLUMN_AXISROTATZ, mModel.getAxisRotationZ() + "");
-        values.put(ShakeDatabase.COLUMN_LATITUDE, mModel.getCurrentLatitude() + "");
         values.put(ShakeDatabase.COLUMN_LONGITUDE, mModel.getCurrentLongitude() + "");
+        values.put(ShakeDatabase.COLUMN_LATITUDE, mModel.getCurrentLatitude() + "");
         values.put(ShakeDatabase.COLUMN_SPEED, mModel.getCurrentSpeed() + "");
         values.put(ShakeDatabase.COLUMN_TIMESTAMP, mModel.getCurrentTimestamp() + "");
         mContentResolver.insert(ShakeDBContentProvider.CONTENT_URI, values);

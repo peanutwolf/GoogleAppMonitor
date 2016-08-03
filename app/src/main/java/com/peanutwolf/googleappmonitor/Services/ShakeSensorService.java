@@ -13,6 +13,7 @@ import android.os.Binder;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.IBinder;
+import android.widget.TextView;
 
 import com.peanutwolf.googleappmonitor.Database.ShakeDatabase;
 import com.peanutwolf.googleappmonitor.Models.ShakePointModel;
@@ -23,7 +24,7 @@ import com.peanutwolf.googleappmonitor.Utilities.RangedLinkedList;
 import java.util.LinkedList;
 import java.util.List;
 
-public class ShakeSensorService extends Service implements SensorEventListener, ShakeServiceDataSource {
+public class ShakeSensorService extends Service implements SensorEventListener, ShakeServiceDataSource<ShakePointModel> {
     public static final String TAG = ShakeSensorService.class.getName();
     private static final  int DOMAIN_WIDTH = 100;
     private SensorManager mSensorMgr;
@@ -33,16 +34,14 @@ public class ShakeSensorService extends Service implements SensorEventListener, 
     private long mLastTime_db;
     private HandlerThread thread;
     private final Binder mBinder = new ShakeSensorBinder();
-    private List<Number> mSensorViewData;
+    private List<ShakePointModel> mSensorViewData;
     private boolean mShakeStarted = false;
     private Thread mUpdaterThread;
-    private ShakePointModel mShakePointModel;
     private LocationServiceDataSource mLocationServiceDataSource;
     private DataSaverService mDataSaverSource;
     private Intent mLocationGoogleServiceIntent;
     private Intent mDataSaverServiceIntent;
     private boolean mAllowSaving = false;
-
 
     @Override
     public IBinder onBind(Intent intent) {
@@ -60,7 +59,6 @@ public class ShakeSensorService extends Service implements SensorEventListener, 
         thread = new HandlerThread("SensorLoop");
         thread.start();
 
-        mShakePointModel = new ShakePointModel();
         mShakeStarted = startShakeSensorListening();
 
         mLocationGoogleServiceIntent = new Intent(getApplicationContext(), LocationGoogleService.class);
@@ -69,7 +67,6 @@ public class ShakeSensorService extends Service implements SensorEventListener, 
         bindService(mLocationGoogleServiceIntent, mLocationConnector, Context.BIND_AUTO_CREATE);
         bindService(mDataSaverServiceIntent, mDataSaverConnector, Context.BIND_AUTO_CREATE);
     }
-
 
     @Override
     public void onDestroy() {
@@ -85,19 +82,22 @@ public class ShakeSensorService extends Service implements SensorEventListener, 
     @Override
     public void onSensorChanged(SensorEvent event) {
         long now = System.currentTimeMillis();
+        ShakePointModel shakePoint = new ShakePointModel();
+        shakePoint.fillModelFromEvent(event);
+        if(mLocationServiceDataSource != null){
+            shakePoint.setCurrentLatLng(mLocationServiceDataSource.getLastKnownLatLng());
+            shakePoint.setCurrentSpeed(mLocationServiceDataSource.getSpeed());
+        }
 
-        mShakePointModel.fillModelFromEvent(event);
-        if(mLocationServiceDataSource != null)
-            mShakePointModel.setCurrentLatLng(mLocationServiceDataSource.getLastKnownLatLng());
 
-        if ((now - mLastTime) > TIME_THRESHOLD) {
+        if((now - mLastTime) > TIME_THRESHOLD){
             synchronized(mSensorViewData){
-                mSensorViewData.add(mShakePointModel.getAccelerationValue());
+                mSensorViewData.add(shakePoint);
             }
             mLastTime = now;
         }
-        if ((now - mLastTime_db) > TIME_THRESHOLD_DB) {
-            writeToDB();
+        if((now - mLastTime_db) > TIME_THRESHOLD_DB){
+            writeToDB(shakePoint);
             mLastTime_db = now;
         }
     }
@@ -107,9 +107,9 @@ public class ShakeSensorService extends Service implements SensorEventListener, 
 
     }
 
-    void writeToDB(){
+    void writeToDB(ShakePointModel shakePoint){
         if(mAllowSaving == true)
-            mDataSaverSource.saveShakePoint(mShakePointModel);
+            mDataSaverSource.saveShakePoint(shakePoint);
     }
 
     public void setAllowDataSaving(boolean permission){
@@ -120,8 +120,10 @@ public class ShakeSensorService extends Service implements SensorEventListener, 
         return mAllowSaving;
     }
 
+
+
     @Override
-    public List<Number> getAccelerationData() {
+    public LinkedList<ShakePointModel> getAccelerationData() {
         synchronized (mSensorViewData) {
             return new LinkedList<>(mSensorViewData);
         }
@@ -196,7 +198,7 @@ public class ShakeSensorService extends Service implements SensorEventListener, 
 
                     if ((now - mLastTime) > TIME_THRESHOLD) {
                         if(!mSensorViewData.isEmpty())
-                            mSensorViewData.add(mShakePointModel.getAccelerationValue());
+                            mSensorViewData.add(mSensorViewData.get(mSensorViewData.size()-1));
                         mLastTime = now;
                     }
                 }

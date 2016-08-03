@@ -128,7 +128,7 @@ public class ShakePointModel {
             mAxisAccelerationX = event.values[0];
             mAxisAccelerationY = event.values[1];
             mAxisAccelerationZ = event.values[2];
-            mCurrentTimestamp = getEventTimestampInMills(event);
+            setCurrentTimestamp(getEventTimestampInMills(event));
         }else if(event.sensor.getType() == Sensor.TYPE_GAME_ROTATION_VECTOR){
             mAxisRotationX = event.values[0];
             mAxisRotationY = event.values[1];

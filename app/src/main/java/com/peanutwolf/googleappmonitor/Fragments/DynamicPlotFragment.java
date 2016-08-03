@@ -16,6 +16,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.Button;
+import android.widget.TextView;
+
 import com.androidplot.xy.BoundaryMode;
 import com.androidplot.xy.LineAndPointFormatter;
 import com.androidplot.xy.XYPlot;
@@ -24,9 +26,12 @@ import com.peanutwolf.googleappmonitor.BuildConfig;
 import com.peanutwolf.googleappmonitor.Database.AndroidDatabaseManager;
 import com.peanutwolf.googleappmonitor.MainActivity;
 import com.peanutwolf.googleappmonitor.Models.DynamicXYPlotModel;
+import com.peanutwolf.googleappmonitor.Models.ShakePointModel;
 import com.peanutwolf.googleappmonitor.R;
 import com.peanutwolf.googleappmonitor.Utilities.DynamicDataSourceLoop;
 import com.peanutwolf.googleappmonitor.Utilities.SimpleDynamicSeries;
+
+import org.w3c.dom.Text;
 
 /**
  * Created by vigursky on 11.05.2016.
@@ -41,6 +46,7 @@ public class DynamicPlotFragment extends Fragment implements DynamicDataSourceLo
     private Handler mUiUpdater;
     private HandlerThread plotUpdater;
     private Handler plotHandler;
+
 
     @Nullable
     @Override
@@ -87,7 +93,6 @@ public class DynamicPlotFragment extends Fragment implements DynamicDataSourceLo
         plotHandler.obtainMessage().sendToTarget();
     }
 
-
     @Override
     public void onDestroy() {
         Log.d(TAG, "onDestroy");
@@ -97,12 +102,10 @@ public class DynamicPlotFragment extends Fragment implements DynamicDataSourceLo
     }
 
 
-
     @Override
     public void onUpdate() {
         dynamicPlot.redraw();
     }
-
 
     private void customizeDynamicPlotView(XYPlot dynamicPlot){
         dynamicPlot.setPlotMargins(0, 0, 0, 0);

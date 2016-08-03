@@ -13,4 +13,6 @@ public interface LocationServiceDataSource {
     @NonNull
     LatLng getLastKnownLatLng();
 
+    @NonNull
+    float getSpeed();
 }

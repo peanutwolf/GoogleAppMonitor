@@ -13,21 +13,18 @@ import android.os.IBinder;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
-import android.widget.Button;
 
 import com.androidplot.xy.BoundaryMode;
 import com.androidplot.xy.LineAndPointFormatter;
 import com.androidplot.xy.XYPlot;
 import com.peanutwolf.googleappmonitor.Database.AndroidDatabaseManager;
-import com.peanutwolf.googleappmonitor.Models.DynamicXYPlot;
+import com.peanutwolf.googleappmonitor.Models.DynamicXYPlotModel;
 import com.peanutwolf.googleappmonitor.Services.DataSaverService;
 import com.peanutwolf.googleappmonitor.Services.ShakeSensorService;
 import com.peanutwolf.googleappmonitor.Utilities.DynamicDataSourceLoop;
-import com.peanutwolf.googleappmonitor.Utilities.RangedLinkedList;
 import com.peanutwolf.googleappmonitor.Utilities.SimpleDynamicSeries;
 
-import java.util.List;
-
+@Deprecated
 public class DynamicPlotXY extends AppCompatActivity implements DynamicDataSourceLoop.iCallback{
 
     private final static int DOMAIN_WIDTH = 100;
@@ -62,9 +59,8 @@ public class DynamicPlotXY extends AppCompatActivity implements DynamicDataSourc
             }
         });
 
-
         sine1Series = new SimpleDynamicSeries();
-        ((DynamicXYPlot)dynamicPlot).addSeries(sine1Series, formatter1);
+        ((DynamicXYPlotModel)dynamicPlot).addSeries(sine1Series, formatter1);
         dynamicPlot.setRangeBoundaries(-5, 5, BoundaryMode.FIXED);
         dynamicPlot.setDomainBoundaries(0, DOMAIN_WIDTH - 1, BoundaryMode.FIXED);
 

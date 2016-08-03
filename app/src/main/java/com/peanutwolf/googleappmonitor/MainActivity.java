@@ -16,30 +16,34 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
+import android.widget.TextView;
+
+import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.CameraPosition;
 import com.peanutwolf.googleappmonitor.Database.ShakeDBContentProvider;
+import com.peanutwolf.googleappmonitor.Models.ShakePointModel;
 import com.peanutwolf.googleappmonitor.Services.DataSaverService;
 import com.peanutwolf.googleappmonitor.Services.Interfaces.LocationServiceDataSource;
 import com.peanutwolf.googleappmonitor.Services.Interfaces.ShakeServiceDataSource;
 import com.peanutwolf.googleappmonitor.Services.LocationGoogleService;
 import com.peanutwolf.googleappmonitor.Services.ShakeSensorService;
 import com.peanutwolf.googleappmonitor.Utilities.DynamicDataSourceLoop;
-import java.util.List;
+import com.peanutwolf.googleappmonitor.Utilities.MapViewEngine;
 
-public class MainActivity extends AppCompatActivity implements OnMapReadyCallback, ShakeServiceDataSource, DynamicDataSourceLoop.iCallback, View.OnClickListener {
+import java.util.LinkedList;
+
+public class MainActivity extends AppCompatActivity implements OnMapReadyCallback, ShakeServiceDataSource<ShakePointModel>, View.OnClickListener {
     public static final String TAG = MainActivity.class.getName();
-    private GoogleMap mMap;
+    private MapViewEngine mMapViewEngine;
     private Intent mShakeServiceIntent;
-    private Intent mDataSaverServiceIntent;
     private ShakeSensorService mShakeSensorService;
     private LocationServiceDataSource mLocationServiceDataSource;
     private Intent mLocationGoogleServiceIntent;
-    private HandlerThread mapsUpdater;
-    private Handler mUiUpdater;
-    private Handler mapsHandler;
     private Button mRideItButton;
+    private TextView mCurrentAxisValuesDbg;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -48,10 +52,13 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         setContentView(R.layout.activity_main);
 
         mRideItButton = (Button) findViewById(R.id.btn_ride_main);
+        if(BuildConfig.DEBUG){
+            mCurrentAxisValuesDbg = (TextView) findViewById(R.id.txt_axis_values_dbg);
+        }
 
+        assert mRideItButton != null;
         mRideItButton.setOnClickListener(this);
 
-        mDataSaverServiceIntent = new Intent(getApplicationContext(), DataSaverService.class);
         mShakeServiceIntent = new Intent(getApplicationContext(), ShakeSensorService.class);
         mLocationGoogleServiceIntent = new Intent(getApplicationContext(), LocationGoogleService.class);
 
@@ -59,22 +66,13 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map_main);
         mapFragment.getMapAsync(this);
 
-        mapsUpdater = new HandlerThread("PlotUpdater");
-        mapsUpdater.start();
-        mUiUpdater = new Handler();
-
         Toolbar myToolbar = (Toolbar) findViewById(R.id.toolbar_main);
         setSupportActionBar(myToolbar);
-
-        return;
     }
 
     @Override
     protected void onStart() {
         super.onStart();
-        DynamicDataSourceLoop dataSourceLoop = new DynamicDataSourceLoop(mUiUpdater, this);
-        mapsHandler = new Handler(mapsUpdater.getLooper(), dataSourceLoop);
-        mapsHandler.obtainMessage().sendToTarget();
     }
 
     @Override
@@ -91,14 +89,12 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         super.onPause();
         unbindService(mShakeConnector);
         unbindService(mLocationConnector);
-        stopService(mDataSaverServiceIntent);
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        mapsUpdater.interrupt();
-        mapsUpdater.quit();
+        mMapViewEngine.stopUpdate();
     }
 
     ServiceConnection mShakeConnector = new ServiceConnection(){
@@ -117,6 +113,8 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
             mLocationServiceDataSource = ((LocationGoogleService.LocationServiceBinder)service).getService();
+            if(mMapViewEngine != null)
+                mMapViewEngine.setLocationServiceDataSource(mLocationServiceDataSource);
         }
 
         @Override
@@ -127,17 +125,23 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     @Override
     public void onMapReady(GoogleMap googleMap) {
-        mMap = googleMap;
-        mMap.setMyLocationEnabled(true);
-        mMap.getUiSettings().setMyLocationButtonEnabled(true);
+        mMapViewEngine = new MapViewEngine(googleMap, mLocationServiceDataSource);
+        mMapViewEngine.beginUpdate();
     }
 
     @Override
-    public List<Number> getAccelerationData() {
-        if(mShakeSensorService != null)
-            return mShakeSensorService.getAccelerationData();
-        else
+    public LinkedList<ShakePointModel> getAccelerationData() {
+        if(mShakeSensorService != null){
+            LinkedList<ShakePointModel> accelerationData = mShakeSensorService.getAccelerationData();
+            if(!accelerationData.isEmpty() && BuildConfig.DEBUG){
+                ShakePointModel lastPoint = accelerationData.getLast();
+                mCurrentAxisValuesDbg.setText("x:" + lastPoint.getAxisAccelerationX() + "\ny:" + lastPoint.getAxisAccelerationY() + "\nz:" + lastPoint.getAxisAccelerationZ());
+            }
+            return accelerationData;
+        }
+        else {
             return null;
+        }
     }
 
     @Override
@@ -158,23 +162,11 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
-            case R.id.action_write_trek:
-                getContentResolver().delete(ShakeDBContentProvider.CONTENT_URI, null,null);
-                mShakeSensorService.setAllowDataSaving(true);
-                return true;
             case R.id.action_export_data:
                 startActivity(new Intent(this.getApplicationContext(), ExportDataTestActivity.class));
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
-        }
-    }
-
-    @Override
-    public void onUpdate() {
-        if(mLocationServiceDataSource != null){
-//            CameraPosition cameraPosition = new CameraPosition.Builder().target(mLocationServiceDataSource.getLastKnownLatLng()).zoom(12).build();
-//            mMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
         }
     }
 

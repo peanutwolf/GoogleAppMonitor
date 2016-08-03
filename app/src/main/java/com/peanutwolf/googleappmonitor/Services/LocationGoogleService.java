@@ -29,6 +29,7 @@ public class LocationGoogleService extends Service implements GoogleApiClient.Co
     private GoogleApiClient mGoogleApiClient;
     private Location mLocation;
     private LocationServiceBinder mBinder;
+    private boolean connected = false;
 
     @Nullable
     @Override
@@ -59,6 +60,7 @@ public class LocationGoogleService extends Service implements GoogleApiClient.Co
 
     @Override
     public void onConnected(@Nullable Bundle bundle){
+        connected = true;
         startLocationUpdates();
     }
 
@@ -103,6 +105,16 @@ public class LocationGoogleService extends Service implements GoogleApiClient.Co
         else
             return new LatLng(59.9405331, 30.3848492); // TODO: Test Location(get from Content Provider)
     }
+
+    @NonNull
+    @Override
+    public float getSpeed() {
+        if(mLocation != null)
+            return mLocation.getSpeed();
+        else
+            return 0f;
+    }
+
 
     public class LocationServiceBinder extends Binder {
         public LocationServiceDataSource getService() {

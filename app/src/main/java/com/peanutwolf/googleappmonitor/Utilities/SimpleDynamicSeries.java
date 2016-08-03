@@ -1,6 +1,7 @@
 package com.peanutwolf.googleappmonitor.Utilities;
 
 import com.androidplot.xy.XYSeries;
+import com.peanutwolf.googleappmonitor.Models.ShakePointModel;
 import com.peanutwolf.googleappmonitor.Services.Interfaces.ShakeServiceDataSource;
 
 import java.util.List;
@@ -9,10 +10,10 @@ import java.util.List;
  * Created by vigursky on 15.04.2016.
  */
 public class SimpleDynamicSeries implements XYSeries {
-    private List<Number> mAxisX;
-    private ShakeServiceDataSource mDataSource;
+    private List<ShakePointModel> mAxisX;
+    private ShakeServiceDataSource<ShakePointModel> mDataSource;
 
-    public void setDataSource(ShakeServiceDataSource source){
+    public void setDataSource(ShakeServiceDataSource<ShakePointModel> source){
         mDataSource = source;
     }
 
@@ -25,14 +26,6 @@ public class SimpleDynamicSeries implements XYSeries {
         if(mDataSource != null)
             return mDataSource.getAverageAccelerationData();
         return 0;
-
-//        if(mAxisX == null || mAxisX.size() == 0)
-//            return 0;
-//        int average = 0;
-//        for(Number n : mAxisX){
-//            average += n.intValue();
-//        }
-//        return average/mAxisX.size();
     }
 
     @Override
@@ -52,7 +45,8 @@ public class SimpleDynamicSeries implements XYSeries {
     public Number getY(int index) {
         Number number = 0;
         try {
-            number = mAxisX.get(index);
+            ShakePointModel shakePoint = mAxisX.get(index);
+            number = shakePoint.getAccelerationValue();
         } catch (IndexOutOfBoundsException e) {
             e.printStackTrace();
             System.out.print("Index is = " + index);

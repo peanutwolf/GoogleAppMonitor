@@ -18,6 +18,7 @@ import com.peanutwolf.googleappmonitor.Utilities.RangedLinkedList;
 /**
  * Created by vigursky on 14.04.2016.
  */
+@Deprecated
 public class DynPlotXYZActivity extends AppCompatActivity {
 
     public static final String TAG = DynPlotXYZActivity.class.getName();

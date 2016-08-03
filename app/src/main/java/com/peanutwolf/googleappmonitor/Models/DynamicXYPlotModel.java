@@ -32,7 +32,7 @@ public class DynamicXYPlotModel extends XYPlot {
 
     @Override
     public void redraw() {
-        int average = 0;
+        int average;
         if(mSeries != null) {
             mSeries.update();
             average = mSeries.getAverage();
