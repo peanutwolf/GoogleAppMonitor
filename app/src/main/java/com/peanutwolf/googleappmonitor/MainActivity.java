@@ -33,6 +33,9 @@ import com.peanutwolf.googleappmonitor.Services.ShakeSensorService;
 import com.peanutwolf.googleappmonitor.Utilities.DynamicDataSourceLoop;
 import com.peanutwolf.googleappmonitor.Utilities.MapViewEngine;
 
+import org.osmdroid.tileprovider.tilesource.TileSourceFactory;
+import org.osmdroid.views.MapView;
+
 import java.util.LinkedList;
 
 public class MainActivity extends AppCompatActivity implements OnMapReadyCallback, ShakeServiceDataSource<ShakePointModel>, View.OnClickListener {
@@ -42,8 +45,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     private ShakeSensorService mShakeSensorService;
     private LocationServiceDataSource mLocationServiceDataSource;
     private Intent mLocationGoogleServiceIntent;
-    private Button mRideItButton;
-    private TextView mCurrentAxisValuesDbg;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -51,20 +52,9 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
         setContentView(R.layout.activity_main);
 
-        mRideItButton = (Button) findViewById(R.id.btn_ride_main);
-        if(BuildConfig.DEBUG){
-            mCurrentAxisValuesDbg = (TextView) findViewById(R.id.txt_axis_values_dbg);
-        }
-
-        assert mRideItButton != null;
-        mRideItButton.setOnClickListener(this);
 
         mShakeServiceIntent = new Intent(getApplicationContext(), ShakeSensorService.class);
         mLocationGoogleServiceIntent = new Intent(getApplicationContext(), LocationGoogleService.class);
-
-        SupportMapFragment mapFragment =
-                (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map_main);
-        mapFragment.getMapAsync(this);
 
         Toolbar myToolbar = (Toolbar) findViewById(R.id.toolbar_main);
         setSupportActionBar(myToolbar);
@@ -94,7 +84,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        mMapViewEngine.stopUpdate();
     }
 
     ServiceConnection mShakeConnector = new ServiceConnection(){
@@ -135,7 +124,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             LinkedList<ShakePointModel> accelerationData = mShakeSensorService.getAccelerationData();
             if(!accelerationData.isEmpty() && BuildConfig.DEBUG){
                 ShakePointModel lastPoint = accelerationData.getLast();
-                mCurrentAxisValuesDbg.setText("x:" + lastPoint.getAxisAccelerationX() + "\ny:" + lastPoint.getAxisAccelerationY() + "\nz:" + lastPoint.getAxisAccelerationZ());
             }
             return accelerationData;
         }
@@ -174,11 +162,9 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     public void onClick(View v) {
         if(mShakeSensorService.isDataSavingAllowed()){
             mShakeSensorService.setAllowDataSaving(false);
-            mRideItButton.setText(getResources().getString(R.string.str_ride_it));
         }else{
             getContentResolver().delete(ShakeDBContentProvider.CONTENT_URI, null,null);
             mShakeSensorService.setAllowDataSaving(true);
-            mRideItButton.setText(getResources().getString(R.string.str_stop_it));
         }
     }
 }

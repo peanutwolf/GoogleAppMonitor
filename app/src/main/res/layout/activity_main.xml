@@ -15,36 +15,15 @@
         android:theme="@style/ThemeOverlay.AppCompat.ActionBar"
         app:popupTheme="@style/ThemeOverlay.AppCompat.Light"/>
 
+
     <fragment
         android:id="@+id/map_main"
-        android:name="com.google.android.gms.maps.SupportMapFragment"
+        android:name="com.peanutwolf.googleappmonitor.Fragments.MapViewFragment"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_weight="2"
-        tools:context="com.peanutwolf.googleappmonitor.MainActivity" >
-
-        <TextView
-            android:id="@+id/txt_axis_values_dbg"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="left|top"
-            android:layout_marginLeft = "25dp"
-            android:text="x:0.0 y:0.0 z:0.0"
-            />
-
-        <Button
-            android:id="@+id/btn_ride_main"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center|bottom"
-            android:text="@string/str_ride_it"
-            android:padding="10dp"
-            android:paddingStart="25dp"
-            android:paddingEnd="25dp"
-            android:layout_marginBottom="25dp" />
-
+        tools:context="com.peanutwolf.googleappmonitor.MainActivity">
     </fragment>
-
 
     <fragment
         android:id="@+id/dyn_plot_main"
