@@ -10,6 +10,17 @@
         android:layout_height="match_parent"
         tilesource="Mapnik" />
 
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="x:0\ny:0\nz:0"
+        android:layout_marginLeft="15dp"
+        android:layout_marginTop="15dp"
+        android:layout_alignParentLeft="true"
+        android:visibility="gone"
+        android:id="@+id/txt_shake_axis"
+        />
+
     <ImageButton
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -34,4 +45,16 @@
         android:layout_alignLeft="@+id/ic_center_map"
         android:layout_alignStart="@+id/ic_center_map"
         android:layout_marginTop="10dp" />
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:padding="10dp"
+        android:layout_marginBottom="15dp"
+        android:layout_centerHorizontal="true"
+        android:layout_alignParentBottom="true"
+        android:text="@string/str_ride_it"
+        android:clickable="false"
+        android:id="@+id/btn_start_track" />
+
 </RelativeLayout>

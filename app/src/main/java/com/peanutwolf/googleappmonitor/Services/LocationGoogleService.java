@@ -29,6 +29,7 @@ public class LocationGoogleService extends Service implements GoogleApiClient.Co
     private GoogleApiClient mGoogleApiClient;
     private Location mLocation;
     private LocationServiceBinder mBinder;
+    private LocationListener mLocationListenerExt;
     private boolean connected = false;
 
     @Nullable
@@ -94,6 +95,7 @@ public class LocationGoogleService extends Service implements GoogleApiClient.Co
 
     @Override
     public void onLocationChanged(Location location){
+        mLocationListenerExt.onLocationChanged(location);
         mLocation = location;
     }
 
@@ -104,6 +106,17 @@ public class LocationGoogleService extends Service implements GoogleApiClient.Co
             return new LatLng(mLocation.getLatitude(), mLocation.getLongitude());
         else
             return new LatLng(59.9405331, 30.3848492); // TODO: Test Location(get from Content Provider)
+    }
+
+    @Nullable
+    @Override
+    public Location getLastKnownLocation() {
+        return mLocation;
+    }
+
+    @Override
+    public void setLocationListener(@NonNull LocationListener locationListener) {
+        mLocationListenerExt = locationListener;
     }
 
     @NonNull

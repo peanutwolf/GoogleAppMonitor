@@ -13,9 +13,7 @@ import android.os.Binder;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.IBinder;
-import android.widget.TextView;
 
-import com.peanutwolf.googleappmonitor.Database.ShakeDatabase;
 import com.peanutwolf.googleappmonitor.Models.ShakePointModel;
 import com.peanutwolf.googleappmonitor.Services.Interfaces.LocationServiceDataSource;
 import com.peanutwolf.googleappmonitor.Services.Interfaces.ShakeServiceDataSource;
@@ -42,6 +40,7 @@ public class ShakeSensorService extends Service implements SensorEventListener, 
     private Intent mLocationGoogleServiceIntent;
     private Intent mDataSaverServiceIntent;
     private boolean mAllowSaving = false;
+    private int mRouteId;
 
     @Override
     public IBinder onBind(Intent intent) {
@@ -83,7 +82,7 @@ public class ShakeSensorService extends Service implements SensorEventListener, 
     public void onSensorChanged(SensorEvent event) {
         long now = System.currentTimeMillis();
         ShakePointModel shakePoint = new ShakePointModel();
-        shakePoint.fillModelFromEvent(event);
+        shakePoint.dataToModel(event);
         if(mLocationServiceDataSource != null){
             shakePoint.setCurrentLatLng(mLocationServiceDataSource.getLastKnownLatLng());
             shakePoint.setCurrentSpeed(mLocationServiceDataSource.getSpeed());
@@ -108,12 +107,17 @@ public class ShakeSensorService extends Service implements SensorEventListener, 
     }
 
     void writeToDB(ShakePointModel shakePoint){
-        if(mAllowSaving == true)
-            mDataSaverSource.saveShakePoint(shakePoint);
+        synchronized (this){
+            if(mAllowSaving == true)
+                mDataSaverSource.saveShakePoint(mRouteId, shakePoint);
+        }
     }
 
     public void setAllowDataSaving(boolean permission){
-        mAllowSaving = permission;
+        synchronized (this){
+            mAllowSaving = permission;
+            mRouteId = mDataSaverSource.calculateNextRouteId();
+        }
     }
 
     public boolean isDataSavingAllowed(){

@@ -1,47 +1,42 @@
 package com.peanutwolf.googleappmonitor.Fragments;
 
-import android.Manifest;
 import android.app.Fragment;
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.content.pm.PackageManager;
-import android.location.Address;
-import android.location.Location;
-import android.location.LocationListener;
-import android.location.LocationManager;
-import android.media.Image;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.support.v4.app.ActivityCompat;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.ImageButton;
 
 import com.peanutwolf.googleappmonitor.R;
 import com.peanutwolf.googleappmonitor.Services.Interfaces.LocationServiceDataSource;
 import com.peanutwolf.googleappmonitor.Utilities.DynamicDataSourceLoop;
+import com.peanutwolf.googleappmonitor.Utilities.GoogleLocationProvider;
 
+import org.osmdroid.views.overlay.Polyline;
 import org.osmdroid.tileprovider.tilesource.ITileSource;
 import org.osmdroid.tileprovider.tilesource.TileSourceFactory;
 import org.osmdroid.util.GeoPoint;
 import org.osmdroid.views.MapView;
-import org.osmdroid.views.overlay.MinimapOverlay;
 import org.osmdroid.views.overlay.ScaleBarOverlay;
 import org.osmdroid.views.overlay.compass.CompassOverlay;
 import org.osmdroid.views.overlay.compass.InternalCompassOrientationProvider;
 import org.osmdroid.views.overlay.gestures.RotationGestureOverlay;
-import org.osmdroid.views.overlay.mylocation.GpsMyLocationProvider;
 import org.osmdroid.views.overlay.mylocation.MyLocationNewOverlay;
+
+import java.util.LinkedHashMap;
+import java.util.LinkedList;
+import java.util.List;
 
 /**
  * Created by vigursky on 04.08.2016.
  */
-public class MapViewFragment extends Fragment implements DynamicDataSourceLoop.iCallback, OpenStreetMapConstants , LocationListener {
+public class MapViewFragment extends Fragment implements DynamicDataSourceLoop.iCallback, OpenStreetMapConstants{
 
     public static final String TAG = MapViewFragment.class.getName();
     private LocationServiceDataSource mLocationDataSource;
@@ -53,8 +48,16 @@ public class MapViewFragment extends Fragment implements DynamicDataSourceLoop.i
     private CompassOverlay mCompassOverlay;
     private ImageButton mCenterMapBtn;
     private ImageButton mFollowMeBnt;
-    private LocationManager lm;
-    private Location currentLocation;
+    private iMapCallback mMapCallback;
+
+    public enum MyMapCommands{
+        LOCATION_ENABLED,
+        LOCATION_DISABLED
+    }
+
+    public interface iMapCallback{
+        void onMapCommand(MyMapCommands command);
+    }
 
     @Nullable
     @Override
@@ -73,9 +76,6 @@ public class MapViewFragment extends Fragment implements DynamicDataSourceLoop.i
                 Log.i(TAG, "centerMap clicked ");
 
                 GeoPoint myPosition = mLocationOverlay.getMyLocation();
-                if(myPosition == null && currentLocation != null){
-                    myPosition = new GeoPoint(currentLocation.getLatitude(), currentLocation.getLongitude());
-                }
 
                 if (myPosition != null) {
                     mMapView.getController().animateTo(myPosition);
@@ -107,29 +107,29 @@ public class MapViewFragment extends Fragment implements DynamicDataSourceLoop.i
 
         final Context context = this.getActivity();
         final DisplayMetrics dm = context.getResources().getDisplayMetrics();
-        // mResourceProxy = new ResourceProxyImpl(getActivity().getApplicationContext());
+
+
 
         mPrefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
 
-        this.mLocationOverlay = new MyLocationNewOverlay(context, mMapView);
+        this.mLocationOverlay = new MyLocationNewOverlay(new GoogleLocationProvider(context),mMapView);
 
         mScaleBarOverlay = new ScaleBarOverlay(mMapView);
         mScaleBarOverlay.setCentred(true);
         mScaleBarOverlay.setScaleBarOffset(dm.widthPixels / 2, 10);
 
         mRotationGestureOverlay = new RotationGestureOverlay(context, mMapView);
-        mRotationGestureOverlay.setEnabled(true);
+        mRotationGestureOverlay.setEnabled(false);
 
-        mMapView.setBuiltInZoomControls(true);
+        mMapView.setBuiltInZoomControls(false);
         mMapView.setMultiTouchControls(true);
+        mMapView.getOverlays().clear();
         mMapView.getOverlays().add(this.mLocationOverlay);
         mMapView.getOverlays().add(this.mScaleBarOverlay);
         mMapView.getOverlays().add(this.mRotationGestureOverlay);
 
         mMapView.getController().setZoom(mPrefs.getInt(PREFS_ZOOM_LEVEL, 1));
         mMapView.scrollTo(mPrefs.getInt(PREFS_SCROLL_X, 0), mPrefs.getInt(PREFS_SCROLL_Y, 0));
-
-        mLocationOverlay.enableMyLocation();
 
         //sorry for the spaghetti code this is to filter out the compass on api 8
         //Note: the compass overlay causes issues on API 8 devices. See https://github.com/osmdroid/osmdroid/issues/218
@@ -140,7 +140,21 @@ public class MapViewFragment extends Fragment implements DynamicDataSourceLoop.i
             mMapView.getOverlays().add(this.mCompassOverlay);
         }
 
-        setHasOptionsMenu(true);
+        if(this.getActivity() instanceof iMapCallback){
+            mMapCallback = (iMapCallback)this.getActivity();
+        }
+
+        mLocationOverlay.runOnFirstFix(new Runnable() {
+            @Override
+            public void run() {
+                MapViewFragment.this.getActivity().runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        mMapCallback.onMapCommand(MyMapCommands.LOCATION_ENABLED);
+                    }
+                });
+            }
+        });
     }
 
     @Override
@@ -160,11 +174,6 @@ public class MapViewFragment extends Fragment implements DynamicDataSourceLoop.i
         }
         edit.commit();
 
-        if (ActivityCompat.checkSelfPermission(getActivity(), Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED ||
-                ActivityCompat.checkSelfPermission(getActivity(), Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-            lm.removeUpdates(this);
-        }
-
         this.mLocationOverlay.disableMyLocation();
         this.mLocationOverlay.disableFollowLocation();
 
@@ -176,8 +185,7 @@ public class MapViewFragment extends Fragment implements DynamicDataSourceLoop.i
         super.onDestroyView();
         //this part terminates all of the overlays and background threads for osmdroid
         //only needed when you programmatically create the map
-        mMapView.onDetach();
-
+//        mMapView.onDetach();
     }
 
     @Override
@@ -201,16 +209,14 @@ public class MapViewFragment extends Fragment implements DynamicDataSourceLoop.i
             if (mCompassOverlay!=null)
                 this.mCompassOverlay.enableCompass();
         }
-
-        lm = (LocationManager) getActivity().getSystemService(Context.LOCATION_SERVICE);
-        if (ActivityCompat.checkSelfPermission(getActivity(), Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED ||
-                ActivityCompat.checkSelfPermission(getActivity(), Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-            lm.requestLocationUpdates(LocationManager.GPS_PROVIDER,0l,0f,this);
-        }
     }
 
-    void setLocationServiceDataSource(LocationServiceDataSource locationSource){
-        this.mLocationDataSource = locationSource;
+    public void drawTrack(List<GeoPoint> trackPoints){
+        Polyline route = new Polyline(this.getActivity());
+        route.setPoints(trackPoints);
+        route.setVisible(true);
+
+        mMapView.getOverlays().add(route);
     }
 
     @Override
@@ -218,23 +224,5 @@ public class MapViewFragment extends Fragment implements DynamicDataSourceLoop.i
 
     }
 
-    @Override
-    public void onLocationChanged(Location location) {
-        currentLocation = location;
-    }
 
-    @Override
-    public void onStatusChanged(String provider, int status, Bundle extras) {
-
-    }
-
-    @Override
-    public void onProviderEnabled(String provider) {
-
-    }
-
-    @Override
-    public void onProviderDisabled(String provider) {
-
-    }
 }

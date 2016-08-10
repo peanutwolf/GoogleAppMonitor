@@ -41,7 +41,10 @@ public class ShakeDBContentProvider extends ContentProvider {
     @Override
     public boolean onCreate() {
         database = new ShakeDatabase(getContext());
-        return false;
+        if(!isTableExists(database.getReadableDatabase(), ShakeDatabase.TABLE_SHAKE)){
+            database.onCreate(database.getWritableDatabase());
+        }
+        return true;
     }
 
     @Nullable
@@ -110,5 +113,21 @@ public class ShakeDBContentProvider extends ContentProvider {
     @Override
     public int update(Uri uri, ContentValues values, String selection, String[] selectionArgs) {
         return 0;
+    }
+
+    boolean isTableExists(SQLiteDatabase db, String tableName)
+    {
+        if (tableName == null || db == null || !db.isOpen())
+        {
+            return false;
+        }
+        Cursor cursor = db.rawQuery("SELECT COUNT(*) FROM sqlite_master WHERE type = ? AND name = ?", new String[] {"table", tableName});
+        if (!cursor.moveToFirst())
+        {
+            return false;
+        }
+        int count = cursor.getInt(0);
+        cursor.close();
+        return count > 0;
     }
 }

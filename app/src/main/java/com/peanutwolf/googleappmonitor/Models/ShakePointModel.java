@@ -1,9 +1,11 @@
 package com.peanutwolf.googleappmonitor.Models;
 
+import android.database.Cursor;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 
 import com.google.android.gms.maps.model.LatLng;
+import com.peanutwolf.googleappmonitor.Database.ShakeDatabase;
 
 import java.util.Date;
 
@@ -11,6 +13,7 @@ import java.util.Date;
  * Created by vigursky on 10.04.2016.
  */
 public class ShakePointModel {
+    private int  mRouteId = 0;
     private double mAxisAccelerationX = 0;
     private double mAxisAccelerationY = 0;
     private double mAxisAccelerationZ = 0;
@@ -21,6 +24,7 @@ public class ShakePointModel {
     private double mCurrentLongitude = 0;
     private float mCurrentSpeed = 0.0F;
     private long mCurrentTimestamp  = 0L;
+
 
     public double getAxisAccelerationX() {
         return mAxisAccelerationX;
@@ -123,7 +127,7 @@ public class ShakePointModel {
         return (mAxisAccelerationX + mAxisAccelerationY + mAxisAccelerationZ)/3;
     }
 
-    public void fillModelFromEvent(SensorEvent event){
+    public void dataToModel(SensorEvent event){
         if(event.sensor.getType() == Sensor.TYPE_ACCELEROMETER){
             mAxisAccelerationX = event.values[0];
             mAxisAccelerationY = event.values[1];
@@ -133,6 +137,26 @@ public class ShakePointModel {
             mAxisRotationX = event.values[0];
             mAxisRotationY = event.values[1];
             mAxisRotationZ = event.values[2];
+        }
+    }
+
+    public void dataToModel(final Cursor cursor){
+        String [] columnsToGet = {ShakeDatabase.COLUMN_ROUTEID, ShakeDatabase.COLUMN_TIMESTAMP};
+        for(String column : columnsToGet){
+            int columnIndex = cursor.getColumnIndex(column);
+            if(columnIndex == -1)
+                continue;
+            String columnValue = cursor.getString(columnIndex);
+            switch (column){
+                case ShakeDatabase.COLUMN_ROUTEID:
+                    mRouteId = Integer.valueOf(columnValue);
+                    break;
+                case ShakeDatabase.COLUMN_TIMESTAMP:
+                    mCurrentTimestamp = Long.valueOf(columnValue);
+                    break;
+                default:
+                    break;
+            }
         }
     }
 
@@ -146,5 +170,13 @@ public class ShakePointModel {
         }
 
         return timestamp;
+    }
+
+    public int getRouteId() {
+        return mRouteId;
+    }
+
+    public void setRouteId(int routeId) {
+        this.mRouteId = routeId;
     }
 }

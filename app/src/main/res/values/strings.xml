@@ -4,6 +4,7 @@
     <string name="hello_world">Hello world!</string>
     <string name="action_settings">Settings</string>
     <string name="title_activity_dynamic_plot_xy">DynamicPlotXY</string>
+    <string name="str_location_search">Searching for your location…</string>
     <string name="str_ride_it">Ride It!</string>
     <string name="str_stop_it">Stop It!</string>
 
@@ -13,5 +14,6 @@
     <string name="saved_test_url">SAVED_TEST_URL</string>
     <string name="title_activity_maps1">Map</string>
     <string name="google_maps_key">AIzaSyCwdt-Wm5L8VoIwGn9f9wV2l0TOcLE1bkY</string>
+    <string name="str_view_routes">View Routes</string>
 
 </resources>

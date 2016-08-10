@@ -14,19 +14,19 @@ import java.util.ArrayList;
  * Created by vigursky on 31.03.2016.
  */
 public class ShakeDatabase extends SQLiteOpenHelper {
-    public static final String TABLE_SHAKE = "shake";
-    public static final String COLUMN_ID = "_id";
-    public static final String COLUMN_ROUTEID = "routeID";
+    public static final String TABLE_SHAKE       = "shake";
+    public static final String COLUMN_ID         = "_id";
+    public static final String COLUMN_ROUTEID    = "routeID";
     public static final String COLUMN_AXISACCELX = "axisaccelx";
     public static final String COLUMN_AXISACCELY = "axisaccely";
     public static final String COLUMN_AXISACCELZ = "axisaccelz";
     public static final String COLUMN_AXISROTATX = "axisrotatx";
     public static final String COLUMN_AXISROTATY = "axisrotaty";
     public static final String COLUMN_AXISROTATZ = "axisrotatz";
-    public static final String COLUMN_LONGITUDE = "longitude";
-    public static final String COLUMN_LATITUDE = "latitude";
-    public static final String COLUMN_SPEED = "speed";
-    public static final String COLUMN_TIMESTAMP = "timestamp";
+    public static final String COLUMN_LONGITUDE  = "longitude";
+    public static final String COLUMN_LATITUDE   = "latitude";
+    public static final String COLUMN_SPEED      = "speed";
+    public static final String COLUMN_TIMESTAMP  = "timestamp";
 
     private static final String DATABASE_NAME = "shakemeter.db";
     private static final int DATABASE_VERSION = 1;
