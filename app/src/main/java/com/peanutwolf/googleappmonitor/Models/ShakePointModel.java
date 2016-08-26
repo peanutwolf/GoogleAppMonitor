@@ -25,6 +25,13 @@ public class ShakePointModel {
     private float mCurrentSpeed = 0.0F;
     private long mCurrentTimestamp  = 0L;
 
+    public ShakePointModel(){
+
+    }
+
+    public ShakePointModel(final Cursor cursor){
+        this.dataToModel(cursor);
+    }
 
     public double getAxisAccelerationX() {
         return mAxisAccelerationX;
@@ -141,7 +148,18 @@ public class ShakePointModel {
     }
 
     public void dataToModel(final Cursor cursor){
-        String [] columnsToGet = {ShakeDatabase.COLUMN_ROUTEID, ShakeDatabase.COLUMN_TIMESTAMP};
+        final String [] columnsToGet = {ShakeDatabase.COLUMN_ROUTEID,
+                ShakeDatabase.COLUMN_AXISACCELX,
+                ShakeDatabase.COLUMN_AXISACCELY,
+                ShakeDatabase.COLUMN_AXISACCELZ,
+                ShakeDatabase.COLUMN_AXISROTATX,
+                ShakeDatabase.COLUMN_AXISROTATY,
+                ShakeDatabase.COLUMN_AXISROTATZ,
+                ShakeDatabase.COLUMN_LATITUDE,
+                ShakeDatabase.COLUMN_LONGITUDE,
+                ShakeDatabase.COLUMN_SPEED,
+                ShakeDatabase.COLUMN_TIMESTAMP};
+
         for(String column : columnsToGet){
             int columnIndex = cursor.getColumnIndex(column);
             if(columnIndex == -1)
@@ -150,6 +168,33 @@ public class ShakePointModel {
             switch (column){
                 case ShakeDatabase.COLUMN_ROUTEID:
                     mRouteId = Integer.valueOf(columnValue);
+                    break;
+                case ShakeDatabase.COLUMN_AXISACCELX:
+                    this.mAxisAccelerationX = Double.valueOf(columnValue);
+                    break;
+                case ShakeDatabase.COLUMN_AXISACCELY:
+                    this.mAxisAccelerationY = Double.valueOf(columnValue);
+                    break;
+                case ShakeDatabase.COLUMN_AXISACCELZ:
+                    this.mAxisAccelerationZ = Double.valueOf(columnValue);
+                    break;
+                case ShakeDatabase.COLUMN_AXISROTATX:
+                    this.mAxisRotationX = Double.valueOf(columnValue);
+                    break;
+                case ShakeDatabase.COLUMN_AXISROTATY:
+                    this.mAxisRotationY = Double.valueOf(columnValue);
+                    break;
+                case ShakeDatabase.COLUMN_AXISROTATZ:
+                    this.mAxisRotationZ = Double.valueOf(columnValue);
+                    break;
+                case ShakeDatabase.COLUMN_LATITUDE:
+                    this.mCurrentLatitude = Double.valueOf(columnValue);
+                    break;
+                case ShakeDatabase.COLUMN_LONGITUDE:
+                    this.mCurrentLongitude = Double.valueOf(columnValue);
+                    break;
+                case ShakeDatabase.COLUMN_SPEED:
+                    this.mCurrentSpeed = Float.valueOf(columnValue);
                     break;
                 case ShakeDatabase.COLUMN_TIMESTAMP:
                     mCurrentTimestamp = Long.valueOf(columnValue);

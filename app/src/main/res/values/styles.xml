@@ -16,4 +16,11 @@
         <item name="legendAnchorPosition">right_bottom</item>
     </style>
 
+    <style name="RouteViewDialog" parent="android:style/Theme.Dialog">
+        <item name="android:windowIsTranslucent">true</item>
+        <item name="android:windowBackground">@android:color/transparent</item>
+        <item name="android:windowNoTitle">true</item>
+        <item name="android:windowFullscreen">false</item>
+    </style>
+
 </resources>

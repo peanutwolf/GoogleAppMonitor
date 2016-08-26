@@ -5,26 +5,39 @@ import android.content.res.Resources;
 import android.database.Cursor;
 import android.graphics.Rect;
 import android.os.Bundle;
+import android.support.v4.app.DialogFragment;
+import android.support.v4.app.FragmentActivity;
+import android.support.v4.app.FragmentManager;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.util.TypedValue;
 import android.view.View;
 
 import com.peanutwolf.googleappmonitor.Adapters.RouteViewsAdapter;
 import com.peanutwolf.googleappmonitor.Database.ShakeDBContentProvider;
+import com.peanutwolf.googleappmonitor.Fragments.RouteViewDialog;
 import com.peanutwolf.googleappmonitor.Models.ShakePointModel;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
+
+import rx.functions.Action1;
 
 /**
  * Created by vigursky on 10.08.2016.
  */
-public class RouteViewerActivity extends AppCompatActivity {
+public class RouteViewerActivity extends FragmentActivity {
+    private static final String TAG = RouteViewerActivity.class.getSimpleName();
     private RecyclerView recyclerView;
-    private List<ShakePointModel> mRoutesList;
+    private Map<Integer, List<ShakePointModel>> mRoutesMap;
     private RouteViewsAdapter mAdapter;
 
     @Override
@@ -35,14 +48,27 @@ public class RouteViewerActivity extends AppCompatActivity {
 
         this.recyclerView = (RecyclerView) findViewById(R.id.recview_routes);
 
-        this.mRoutesList = new ArrayList<>();
-        this.mAdapter = new RouteViewsAdapter(this, this.mRoutesList);
+        this.mRoutesMap = new LinkedHashMap<>();
+
+        this.mAdapter = new RouteViewsAdapter(this, this.mRoutesMap);
 
         RecyclerView.LayoutManager mLayoutManager = new GridLayoutManager(this, 2);
         recyclerView.setLayoutManager(mLayoutManager);
         recyclerView.addItemDecoration(new GridSpacingItemDecoration(2, dpToPx(10), true));
         recyclerView.setItemAnimator(new DefaultItemAnimator());
         recyclerView.setAdapter(this.mAdapter);
+
+        this.mAdapter.getPositionClicks().subscribe(new Action1<Integer>() {
+            @Override
+            public void call(Integer integer) {
+                Log.i(TAG, "Item Route clicked " + integer);
+                FragmentManager fm = getSupportFragmentManager();
+                RouteViewDialog routeViewDialog = RouteViewDialog.newInstance();
+                routeViewDialog.setRoutePoints(mRoutesMap.get(integer));
+                routeViewDialog.setStyle(DialogFragment.STYLE_NO_FRAME, R.style.RouteViewDialog);
+                routeViewDialog.show(fm, "fragment_route_view");
+            }
+        });
 
         prepareRoutes();
     }
@@ -54,14 +80,15 @@ public class RouteViewerActivity extends AppCompatActivity {
         cursor.moveToFirst();
         if(cursor.getCount() == 0)
             return;
-
         do{
-            ShakePointModel model = new ShakePointModel();
-            model.dataToModel(cursor);
-            mRoutesList.add(model);
+            ShakePointModel model = new ShakePointModel(cursor);
+            if(mRoutesMap.get(model.getRouteId()) == null){
+                mRoutesMap.put(model.getRouteId(), new LinkedList<ShakePointModel>());
+            }
+            mRoutesMap.get(model.getRouteId()).add(model);
         }while (cursor.moveToNext());
 
-            cursor.close();
+        cursor.close();
     }
 
     /**

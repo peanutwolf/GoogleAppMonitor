@@ -64,11 +64,11 @@ public class MapViewFragment extends Fragment implements DynamicDataSourceLoop.i
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 
         View v = inflater.inflate(R.layout.fragment_main_mapview, container, false);
-        mMapView = (MapView) v.findViewById(R.id.mapview);
+        mMapView = (MapView) v.findViewById(R.id.mapview_main);
 
         mCenterMapBtn = (ImageButton) v.findViewById(R.id.ic_center_map);
         mFollowMeBnt = (ImageButton) v.findViewById(R.id.ic_follow_me);
-        mMapView.setTileSource(TileSourceFactory.CYCLEMAP);
+        mMapView.setTileSource(TileSourceFactory.MAPNIK);
 
         mCenterMapBtn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -209,14 +209,6 @@ public class MapViewFragment extends Fragment implements DynamicDataSourceLoop.i
             if (mCompassOverlay!=null)
                 this.mCompassOverlay.enableCompass();
         }
-    }
-
-    public void drawTrack(List<GeoPoint> trackPoints){
-        Polyline route = new Polyline(this.getActivity());
-        route.setPoints(trackPoints);
-        route.setVisible(true);
-
-        mMapView.getOverlays().add(route);
     }
 
     @Override
