@@ -15,6 +15,7 @@ import java.util.ArrayList;
  */
 public class ShakeDatabase extends SQLiteOpenHelper {
     public static final String TABLE_SHAKE       = "shake";
+    public static final String TABLE_ROUTES      = "routes";
     public static final String COLUMN_ID         = "_id";
     public static final String COLUMN_ROUTEID    = "routeID";
     public static final String COLUMN_AXISACCELX = "axisaccelx";
@@ -46,6 +47,12 @@ public class ShakeDatabase extends SQLiteOpenHelper {
             + COLUMN_TIMESTAMP + " text not null"
             +");";
 
+    public static final String TABLE_ROUTES_CREATE = "CREATE TABLE IF NOT EXISTS "
+            + TABLE_ROUTES + "("
+            + COLUMN_ID + " integer primary key autoincrement, "
+            + COLUMN_TIMESTAMP + " text not null"
+            + ");";
+
     public ShakeDatabase(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
     }
@@ -53,11 +60,13 @@ public class ShakeDatabase extends SQLiteOpenHelper {
     @Override
     public void onCreate(SQLiteDatabase db) {
         db.execSQL(TABLE_CREATE);
+        db.execSQL(TABLE_ROUTES_CREATE);
     }
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
         db.execSQL("DROP TABLE IF EXISTS " +  TABLE_SHAKE);
+        db.execSQL("DROP TABLE IF EXISTS " +  TABLE_ROUTES);
         onCreate(db);
     }
 

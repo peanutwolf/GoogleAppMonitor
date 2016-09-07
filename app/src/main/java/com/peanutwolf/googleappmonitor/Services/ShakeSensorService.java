@@ -13,6 +13,7 @@ import android.os.Binder;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.IBinder;
+import android.util.Log;
 
 import com.peanutwolf.googleappmonitor.Models.ShakePointModel;
 import com.peanutwolf.googleappmonitor.Services.Interfaces.LocationServiceDataSource;
@@ -23,7 +24,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 public class ShakeSensorService extends Service implements SensorEventListener, ShakeServiceDataSource<ShakePointModel> {
-    public static final String TAG = ShakeSensorService.class.getName();
+    public static final String TAG = ShakeSensorService.class.getName()+"Service";
     private static final  int DOMAIN_WIDTH = 100;
     private SensorManager mSensorMgr;
     private static final int TIME_THRESHOLD = 10;
@@ -47,7 +48,6 @@ public class ShakeSensorService extends Service implements SensorEventListener, 
         return mBinder;
     }
 
-
     @Override
     public void onCreate() {
         super.onCreate();
@@ -68,7 +68,14 @@ public class ShakeSensorService extends Service implements SensorEventListener, 
     }
 
     @Override
+    public int onStartCommand(Intent intent, int flags, int startId) {
+        Log.d(TAG, "onStartCommand");
+        return super.onStartCommand(intent, flags, startId);
+    }
+
+    @Override
     public void onDestroy() {
+        Log.d(TAG, "OnDestroy");
         super.onDestroy();
         thread.quit();
         mUpdaterThread.interrupt();
@@ -87,7 +94,6 @@ public class ShakeSensorService extends Service implements SensorEventListener, 
             shakePoint.setCurrentLatLng(mLocationServiceDataSource.getLastKnownLatLng());
             shakePoint.setCurrentSpeed(mLocationServiceDataSource.getSpeed());
         }
-
 
         if((now - mLastTime) > TIME_THRESHOLD){
             synchronized(mSensorViewData){
@@ -123,8 +129,6 @@ public class ShakeSensorService extends Service implements SensorEventListener, 
     public boolean isDataSavingAllowed(){
         return mAllowSaving;
     }
-
-
 
     @Override
     public LinkedList<ShakePointModel> getAccelerationData() {
