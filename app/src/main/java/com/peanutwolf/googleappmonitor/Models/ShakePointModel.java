@@ -7,8 +7,6 @@ import android.hardware.SensorEvent;
 import com.google.android.gms.maps.model.LatLng;
 import com.peanutwolf.googleappmonitor.Database.ShakeDatabase;
 
-import java.util.Date;
-
 /**
  * Created by vigursky on 10.04.2016.
  */
@@ -148,7 +146,7 @@ public class ShakePointModel {
     }
 
     public void dataToModel(final Cursor cursor){
-        final String [] columnsToGet = {ShakeDatabase.COLUMN_ROUTEID,
+        final String [] columnsToGet = {ShakeDatabase.COLUMN_TREKID,
                 ShakeDatabase.COLUMN_AXISACCELX,
                 ShakeDatabase.COLUMN_AXISACCELY,
                 ShakeDatabase.COLUMN_AXISACCELZ,
@@ -166,7 +164,7 @@ public class ShakePointModel {
                 continue;
             String columnValue = cursor.getString(columnIndex);
             switch (column){
-                case ShakeDatabase.COLUMN_ROUTEID:
+                case ShakeDatabase.COLUMN_TREKID:
                     mRouteId = Integer.valueOf(columnValue);
                     break;
                 case ShakeDatabase.COLUMN_AXISACCELX:

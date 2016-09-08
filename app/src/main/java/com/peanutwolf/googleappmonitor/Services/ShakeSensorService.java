@@ -16,6 +16,7 @@ import android.os.IBinder;
 import android.util.Log;
 
 import com.peanutwolf.googleappmonitor.Models.ShakePointModel;
+import com.peanutwolf.googleappmonitor.Models.TrekModel;
 import com.peanutwolf.googleappmonitor.Services.Interfaces.LocationServiceDataSource;
 import com.peanutwolf.googleappmonitor.Services.Interfaces.ShakeServiceDataSource;
 import com.peanutwolf.googleappmonitor.Utilities.RangedLinkedList;
@@ -42,6 +43,7 @@ public class ShakeSensorService extends Service implements SensorEventListener, 
     private Intent mDataSaverServiceIntent;
     private boolean mAllowSaving = false;
     private int mRouteId;
+    private TrekModel mCurrentTrek;
 
     @Override
     public IBinder onBind(Intent intent) {
@@ -112,21 +114,26 @@ public class ShakeSensorService extends Service implements SensorEventListener, 
 
     }
 
-    void writeToDB(ShakePointModel shakePoint){
-        synchronized (this){
-            if(mAllowSaving == true)
-                mDataSaverSource.saveShakePoint(mRouteId, shakePoint);
-        }
+    private synchronized void writeToDB(ShakePointModel shakePoint){
+        if(mAllowSaving == true)
+            mDataSaverSource.saveShakePoint(mCurrentTrek.getId(), shakePoint);
     }
 
-    public void setAllowDataSaving(boolean permission){
-        synchronized (this){
-            mAllowSaving = permission;
-            mRouteId = mDataSaverSource.calculateNextRouteId();
-        }
+    public synchronized void startTrekking(){
+        mCurrentTrek = new TrekModel();
+        mCurrentTrek.setTimestamp(System.currentTimeMillis());
+        mCurrentTrek.setDistance(0);
+        int trekId = mDataSaverSource.saveTrekModel(mCurrentTrek);
+        mCurrentTrek.setId(trekId);
+        mAllowSaving = true;
     }
 
-    public boolean isDataSavingAllowed(){
+    public synchronized void stopTrekking(){
+        mAllowSaving = false;
+    }
+
+
+    public synchronized boolean isDataSavingAllowed(){
         return mAllowSaving;
     }
 

@@ -24,8 +24,6 @@ import com.peanutwolf.googleappmonitor.Models.ShakePointModel;
 import com.peanutwolf.googleappmonitor.Services.Interfaces.ShakeServiceDataSource;
 import com.peanutwolf.googleappmonitor.Services.ShakeSensorService;
 
-import org.osmdroid.views.MapView;
-
 import java.util.LinkedList;
 
 public class MainActivity extends AppCompatActivity implements ShakeServiceDataSource<ShakePointModel>, View.OnClickListener, MapViewFragment.iMapCallback {
@@ -85,6 +83,11 @@ public class MainActivity extends AppCompatActivity implements ShakeServiceDataS
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
             mShakeSensorService = ((ShakeSensorService.ShakeSensorBinder)service).getService();
+            if(mShakeSensorService.isDataSavingAllowed()){
+                mStartTrackBtn.setText(getResources().getText(R.string.str_stop_it));
+            }else{
+                mStartTrackBtn.setText(getResources().getText(R.string.str_ride_it));
+            }
         }
 
         @Override
@@ -156,10 +159,10 @@ public class MainActivity extends AppCompatActivity implements ShakeServiceDataS
     @Override
     public void onClick(View v) {
         if(mShakeSensorService.isDataSavingAllowed()){
-            mShakeSensorService.setAllowDataSaving(false);
+            mShakeSensorService.stopTrekking();
             mStartTrackBtn.setText(getResources().getText(R.string.str_ride_it));
         }else{
-            mShakeSensorService.setAllowDataSaving(true);
+            mShakeSensorService.startTrekking();
             mStartTrackBtn.setText(getResources().getText(R.string.str_stop_it));
         }
     }

@@ -17,14 +17,19 @@ public class ShakeDBContentProvider extends ContentProvider {
     private ShakeDatabase database;
 
     private static final int SHAKES = 10;
-    private static final int SHAKE_ID = 20;
-    private static final int ROUTE_ID = 30;
+    private static final int TREKS = 20;
+    private static final int SHAKE_ID = 30;
+    private static final int ROUTE_ID = 40;
 
     private static final String AUTHORITY = "com.peanutwolf.googleappmonitor.Database";
 
     private static final String BASE_PATH = "shakes";
+    private static final String TREK_PATH = "treks";
     public static final Uri CONTENT_URI = Uri.parse("content://" + AUTHORITY
             + "/" + BASE_PATH);
+
+    public static final Uri CONTENT_TREK_URI = Uri.parse("content://" + AUTHORITY
+            + "/" + TREK_PATH);
 
     public static final String CONTENT_TYPE = ContentResolver.CURSOR_DIR_BASE_TYPE
             + "/shakes";
@@ -34,6 +39,7 @@ public class ShakeDBContentProvider extends ContentProvider {
     private static final UriMatcher sURIMatcher = new UriMatcher(UriMatcher.NO_MATCH);
     static {
         sURIMatcher.addURI(AUTHORITY, BASE_PATH, SHAKES);
+        sURIMatcher.addURI(AUTHORITY, TREK_PATH, TREKS);
         sURIMatcher.addURI(AUTHORITY, BASE_PATH + "/#", SHAKE_ID);
         sURIMatcher.addURI(AUTHORITY, BASE_PATH + "/#", ROUTE_ID);
     }
@@ -58,12 +64,13 @@ public class ShakeDBContentProvider extends ContentProvider {
         int uriType = sURIMatcher.match(uri);
         switch (uriType) {
             case SHAKES:
+            case TREKS:
                 break;
             case SHAKE_ID:
                 queryBuilder.appendWhere(ShakeDatabase.COLUMN_ID + "="
                         + uri.getLastPathSegment());
             case ROUTE_ID:
-                queryBuilder.appendWhere(ShakeDatabase.COLUMN_ROUTEID + "="
+                queryBuilder.appendWhere(ShakeDatabase.COLUMN_TREKID + "="
                         + uri.getLastPathSegment());
                 break;
             default:
@@ -95,6 +102,9 @@ public class ShakeDBContentProvider extends ContentProvider {
         switch (uriType) {
             case SHAKES:
                 id = sqlDB.insert(ShakeDatabase.TABLE_SHAKE, null, values);
+                break;
+            case TREKS:
+                id = sqlDB.insert(ShakeDatabase.TABLE_TREK, null, values);
                 break;
             default:
                 throw new IllegalArgumentException("Unknown URI: " + uri);

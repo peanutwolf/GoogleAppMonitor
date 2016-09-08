@@ -15,9 +15,9 @@ import java.util.ArrayList;
  */
 public class ShakeDatabase extends SQLiteOpenHelper {
     public static final String TABLE_SHAKE       = "shake";
-    public static final String TABLE_ROUTES      = "routes";
+    public static final String TABLE_TREK        = "trek";
     public static final String COLUMN_ID         = "_id";
-    public static final String COLUMN_ROUTEID    = "routeID";
+    public static final String COLUMN_TREKID     = "trekID";
     public static final String COLUMN_AXISACCELX = "axisaccelx";
     public static final String COLUMN_AXISACCELY = "axisaccely";
     public static final String COLUMN_AXISACCELZ = "axisaccelz";
@@ -28,13 +28,13 @@ public class ShakeDatabase extends SQLiteOpenHelper {
     public static final String COLUMN_LATITUDE   = "latitude";
     public static final String COLUMN_SPEED      = "speed";
     public static final String COLUMN_TIMESTAMP  = "timestamp";
+    public static final String COLUMN_DISTANCE   = "distance";
 
     private static final String DATABASE_NAME = "shakemeter.db";
     private static final int DATABASE_VERSION = 1;
     private static final String TABLE_CREATE = "create table if not exists "
             + TABLE_SHAKE + "("
             + COLUMN_ID + " integer primary key autoincrement, "
-            + COLUMN_ROUTEID + " text not null, "
             + COLUMN_AXISACCELX + " text not null, "
             + COLUMN_AXISACCELY + " text not null, "
             + COLUMN_AXISACCELZ + " text not null, "
@@ -44,13 +44,16 @@ public class ShakeDatabase extends SQLiteOpenHelper {
             + COLUMN_LONGITUDE + " text not null, "
             + COLUMN_LATITUDE + " text not null, "
             + COLUMN_SPEED + " text not null, "
-            + COLUMN_TIMESTAMP + " text not null"
+            + COLUMN_TIMESTAMP + " text not null,"
+            + COLUMN_TREKID + " INTEGER, FOREIGN KEY("
+            + COLUMN_TREKID + ") REFERENCES " + TABLE_TREK + " ("+ COLUMN_ID +")"
             +");";
 
     public static final String TABLE_ROUTES_CREATE = "CREATE TABLE IF NOT EXISTS "
-            + TABLE_ROUTES + "("
+            + TABLE_TREK + "("
             + COLUMN_ID + " integer primary key autoincrement, "
-            + COLUMN_TIMESTAMP + " text not null"
+            + COLUMN_TIMESTAMP + " text not null,"
+            + COLUMN_DISTANCE + " text not null"
             + ");";
 
     public ShakeDatabase(Context context) {
@@ -66,7 +69,7 @@ public class ShakeDatabase extends SQLiteOpenHelper {
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
         db.execSQL("DROP TABLE IF EXISTS " +  TABLE_SHAKE);
-        db.execSQL("DROP TABLE IF EXISTS " +  TABLE_ROUTES);
+        db.execSQL("DROP TABLE IF EXISTS " + TABLE_TREK);
         onCreate(db);
     }
 
