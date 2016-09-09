@@ -20,7 +20,10 @@ import com.peanutwolf.googleappmonitor.Database.ShakeDBContentProvider;
 import com.peanutwolf.googleappmonitor.Database.ShakeDatabase;
 import com.peanutwolf.googleappmonitor.Models.ShakePointModel;
 import com.peanutwolf.googleappmonitor.Models.TrekModel;
+import com.peanutwolf.googleappmonitor.Models.TrekModelDAO;
 import com.peanutwolf.googleappmonitor.Utilities.DynamicDataSourceLoop;
+
+import java.util.List;
 
 
 /**
@@ -31,7 +34,6 @@ public class DataSaverService extends Service {
     private static final String TAG = DataSaverService.class.getName();
     private ContentResolver mContentResolver;
     private final Binder mBinder = new DataSaverBinder();
-    private int mRouteId = 1;
     private Looper mServiceLooper;
     private DataSaverHandler mServiceHandler;
 
@@ -43,10 +45,17 @@ public class DataSaverService extends Service {
         @Override
         public void handleMessage(Message msg) {
             synchronized (mContentResolver){
-
+                TrekModelDAO trekModelDAO = new TrekModelDAO(DataSaverService.this);
+                trekModelDAO.getTrekModels();
             }
-            stopSelf(msg.arg1);
         }
+    }
+
+    public void loadtreks(){
+        Message msg = mServiceHandler.obtainMessage();
+        msg.what = 1;
+        mServiceHandler.sendMessage(msg);
+
     }
 
     @Override
@@ -99,27 +108,6 @@ public class DataSaverService extends Service {
     @Override
     public IBinder onBind(Intent intent) {
         return mBinder;
-    }
-
-    public int calculateNextRouteId() {
-
-        int currentRouteId = 0;
-        String [] mProjection = {ShakeDatabase.COLUMN_TREKID};
-        Cursor routeIDs = mContentResolver.query(ShakeDBContentProvider.CONTENT_URI, mProjection, null, null, null);
-        routeIDs.moveToFirst();
-        if(routeIDs.getCount() > 0){
-            do{
-                assert routeIDs != null;
-                int columnIndex = routeIDs.getColumnIndex(ShakeDatabase.COLUMN_TREKID);
-                String columnValue = routeIDs.getString(columnIndex);
-                int routeid_tmp = Integer.valueOf(columnValue);
-                currentRouteId = currentRouteId < routeid_tmp ? routeid_tmp : currentRouteId;
-            }while(routeIDs.moveToNext());
-        }
-
-        routeIDs.close();
-        return ++currentRouteId;
-
     }
 
     public class DataSaverBinder extends Binder {

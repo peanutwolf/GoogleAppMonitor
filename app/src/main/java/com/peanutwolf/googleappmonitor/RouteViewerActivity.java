@@ -1,6 +1,9 @@
 package com.peanutwolf.googleappmonitor;
 
+import android.app.LoaderManager;
 import android.content.ContentResolver;
+import android.content.CursorLoader;
+import android.content.Loader;
 import android.content.res.Resources;
 import android.database.Cursor;
 import android.graphics.Rect;
@@ -8,8 +11,6 @@ import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
-import android.support.v7.app.AlertDialog;
-import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -17,13 +18,14 @@ import android.util.Log;
 import android.util.TypedValue;
 import android.view.View;
 
+import com.peanutwolf.googleappmonitor.Adapters.RouteViewCursorAdapter;
 import com.peanutwolf.googleappmonitor.Adapters.RouteViewsAdapter;
 import com.peanutwolf.googleappmonitor.Database.ShakeDBContentProvider;
+import com.peanutwolf.googleappmonitor.Database.ShakeDatabase;
 import com.peanutwolf.googleappmonitor.Fragments.RouteViewDialog;
 import com.peanutwolf.googleappmonitor.Models.ShakePointModel;
+import com.peanutwolf.googleappmonitor.Models.TrekModel;
 
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -35,10 +37,13 @@ import rx.functions.Action1;
  * Created by vigursky on 10.08.2016.
  */
 public class RouteViewerActivity extends FragmentActivity {
+    public static final int TREK_LOADER_ID = 1;
     private static final String TAG = RouteViewerActivity.class.getSimpleName();
     private RecyclerView recyclerView;
+    private List<TrekModel> mTreksList;
     private Map<Integer, List<ShakePointModel>> mRoutesMap;
     private RouteViewsAdapter mAdapter;
+    private RouteViewCursorAdapter mCursorAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -46,19 +51,23 @@ public class RouteViewerActivity extends FragmentActivity {
 
         setContentView(R.layout.activity_route_view);
 
+        TrekLoader trekLoader = new TrekLoader();
+
         this.recyclerView = (RecyclerView) findViewById(R.id.recview_routes);
 
         this.mRoutesMap = new LinkedHashMap<>();
 
         this.mAdapter = new RouteViewsAdapter(this, this.mRoutesMap);
+        this.mCursorAdapter = new RouteViewCursorAdapter(null);
 
         RecyclerView.LayoutManager mLayoutManager = new GridLayoutManager(this, 2);
         recyclerView.setLayoutManager(mLayoutManager);
         recyclerView.addItemDecoration(new GridSpacingItemDecoration(2, dpToPx(10), true));
         recyclerView.setItemAnimator(new DefaultItemAnimator());
-        recyclerView.setAdapter(this.mAdapter);
+        recyclerView.setAdapter(this.mCursorAdapter);
+//        recyclerView.setAdapter(this.mAdapter);
 
-        this.mAdapter.getPositionClicks().subscribe(new Action1<Integer>() {
+/*        this.mAdapter.getPositionClicks().subscribe(new Action1<Integer>() {
             @Override
             public void call(Integer integer) {
                 Log.i(TAG, "Item Route clicked " + integer);
@@ -70,7 +79,10 @@ public class RouteViewerActivity extends FragmentActivity {
             }
         });
 
-        prepareRoutes();
+        prepareRoutes();*/
+
+        this.getLoaderManager().initLoader(TREK_LOADER_ID, null, trekLoader);
+        this.getLoaderManager().restartLoader(TREK_LOADER_ID, null, trekLoader);
     }
 
     private void prepareRoutes(){
@@ -91,9 +103,6 @@ public class RouteViewerActivity extends FragmentActivity {
         cursor.close();
     }
 
-    /**
-     * RecyclerView item decoration - give equal margin around grid item
-     */
     public class GridSpacingItemDecoration extends RecyclerView.ItemDecoration {
 
         private int spanCount;
@@ -135,5 +144,34 @@ public class RouteViewerActivity extends FragmentActivity {
     private int dpToPx(int dp) {
         Resources r = getResources();
         return Math.round(TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, dp, r.getDisplayMetrics()));
+    }
+
+
+    private class TrekLoader implements LoaderManager.LoaderCallbacks<Cursor> {
+        private final String TAG = RouteViewerActivity.TAG + TrekLoader.class.getSimpleName();
+        @Override
+        public Loader<Cursor> onCreateLoader(int id, Bundle args) {
+            Log.d(TAG, "onCreateLoader");
+            CursorLoader loader = new CursorLoader(
+                    RouteViewerActivity.this,
+                    ShakeDBContentProvider.CONTENT_TREK_URI,
+                    new String[]{ShakeDatabase.COLUMN_ID,
+                                 ShakeDatabase.COLUMN_TIMESTAMP,
+                                 ShakeDatabase.COLUMN_DISTANCE},
+                    null, null, null);
+            return loader;
+        }
+
+        @Override
+        public void onLoadFinished(Loader<Cursor> loader, Cursor cursor) {
+            if(cursor == null || cursor.getCount() == 0)
+                return;
+            RouteViewerActivity.this.mCursorAdapter.swapCursor(cursor);
+        }
+
+        @Override
+        public void onLoaderReset(Loader<Cursor> loader) {
+
+        }
     }
 }

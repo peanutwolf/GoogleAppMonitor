@@ -22,6 +22,10 @@ public class TrekModel {
         this.mTimestamp = timestamp;
     }
 
+    public void setTimestamp(String parcelableTimestamp){
+        mTimestamp = Long.parseLong(parcelableTimestamp);
+    }
+
     public long getDistance() {
         return mDistance;
     }
@@ -38,4 +42,7 @@ public class TrekModel {
         this.id = id;
     }
 
+    public void setDistance(String parcelableDistance) {
+        this.mDistance = Long.parseLong(parcelableDistance);
+    }
 }

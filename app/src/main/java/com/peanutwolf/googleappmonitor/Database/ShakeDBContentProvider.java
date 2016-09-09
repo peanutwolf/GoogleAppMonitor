@@ -59,16 +59,18 @@ public class ShakeDBContentProvider extends ContentProvider {
                         String[] selectionArgs, String sortOrder) {
         SQLiteQueryBuilder queryBuilder = new SQLiteQueryBuilder();
 
-        queryBuilder.setTables(ShakeDatabase.TABLE_SHAKE);
-
         int uriType = sURIMatcher.match(uri);
         switch (uriType) {
             case SHAKES:
+                queryBuilder.setTables(ShakeDatabase.TABLE_SHAKE);
+                break;
             case TREKS:
+                queryBuilder.setTables(ShakeDatabase.TABLE_TREK);
                 break;
             case SHAKE_ID:
                 queryBuilder.appendWhere(ShakeDatabase.COLUMN_ID + "="
                         + uri.getLastPathSegment());
+                break;
             case ROUTE_ID:
                 queryBuilder.appendWhere(ShakeDatabase.COLUMN_TREKID + "="
                         + uri.getLastPathSegment());

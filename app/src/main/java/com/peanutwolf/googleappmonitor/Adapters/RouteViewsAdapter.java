@@ -3,6 +3,7 @@ package com.peanutwolf.googleappmonitor.Adapters;
 
 import com.peanutwolf.googleappmonitor.*;
 import com.peanutwolf.googleappmonitor.Models.ShakePointModel;
+import com.peanutwolf.googleappmonitor.Models.TrekModel;
 
 import android.content.Context;
 import android.support.annotation.NonNull;
@@ -45,6 +46,11 @@ public class RouteViewsAdapter extends RecyclerView.Adapter<RouteViewsAdapter.Ro
     public RouteViewsAdapter(Context context, @NonNull Map<Integer, List<ShakePointModel>> shakePointsMap){
         this.mContext = context;
         this.mShakePointsMap =  shakePointsMap;
+    }
+
+    public RouteViewsAdapter(Context context, @NonNull List<TrekModel> treksList){
+        this.mContext = context;
+        mShakePointsMap = null;
     }
 
     @Override
