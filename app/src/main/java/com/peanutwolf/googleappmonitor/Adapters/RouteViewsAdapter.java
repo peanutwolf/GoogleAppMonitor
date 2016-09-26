@@ -2,19 +2,17 @@ package com.peanutwolf.googleappmonitor.Adapters;
 
 
 import com.peanutwolf.googleappmonitor.*;
-import com.peanutwolf.googleappmonitor.Models.ShakePointModel;
+import com.peanutwolf.googleappmonitor.Models.ShakePointPOJO;
 import com.peanutwolf.googleappmonitor.Models.TrekModel;
 
 import android.content.Context;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
-import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -29,7 +27,7 @@ import rx.subjects.PublishSubject;
 public class RouteViewsAdapter extends RecyclerView.Adapter<RouteViewsAdapter.RouteViewHolder> {
 
     private final Context mContext;
-    private final Map<Integer , List<ShakePointModel>> mShakePointsMap;
+    private final Map<Integer , List<ShakePointPOJO>> mShakePointsMap;
     private PublishSubject<Integer> subject = PublishSubject.create();
 
 
@@ -43,7 +41,7 @@ public class RouteViewsAdapter extends RecyclerView.Adapter<RouteViewsAdapter.Ro
         }
     }
 
-    public RouteViewsAdapter(Context context, @NonNull Map<Integer, List<ShakePointModel>> shakePointsMap){
+    public RouteViewsAdapter(Context context, @NonNull Map<Integer, List<ShakePointPOJO>> shakePointsMap){
         this.mContext = context;
         this.mShakePointsMap =  shakePointsMap;
     }
@@ -63,12 +61,12 @@ public class RouteViewsAdapter extends RecyclerView.Adapter<RouteViewsAdapter.Ro
 
     @Override
     public void onBindViewHolder(final RouteViewHolder holder, final int position) {
-        Set<Map.Entry<Integer, List<ShakePointModel>>> modelSet = mShakePointsMap.entrySet();
-        Iterator<Map.Entry<Integer, List<ShakePointModel>>> modelSetIter = modelSet.iterator();
+        Set<Map.Entry<Integer, List<ShakePointPOJO>>> modelSet = mShakePointsMap.entrySet();
+        Iterator<Map.Entry<Integer, List<ShakePointPOJO>>> modelSetIter = modelSet.iterator();
         Integer currentKey = 0;
 
         for(int i = 0; i <= position && modelSetIter.hasNext(); i++){
-            Map.Entry<Integer, List<ShakePointModel>> entry = modelSetIter.next();
+            Map.Entry<Integer, List<ShakePointPOJO>> entry = modelSetIter.next();
             currentKey = entry.getKey();
         }
 

@@ -11,6 +11,7 @@ import com.peanutwolf.googleappmonitor.Services.Interfaces.LocationServiceDataSo
 /**
  * Created by vigursky on 03.08.2016.
  */
+@Deprecated
 public class MapViewEngine implements DynamicDataSourceLoop.iCallback, GoogleMap.OnMapLoadedCallback, GoogleMap.OnCameraChangeListener {
     private static final String TAG = MapViewEngine.class.getSimpleName();
     private GoogleMap mMap;

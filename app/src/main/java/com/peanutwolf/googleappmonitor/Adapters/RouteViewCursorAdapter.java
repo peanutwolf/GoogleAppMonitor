@@ -10,11 +10,15 @@ import android.widget.TextView;
 
 import com.peanutwolf.googleappmonitor.R;
 
+import rx.Observable;
+import rx.subjects.PublishSubject;
+
 /**
  * Created by vigursky on 26.04.2016.
  */
 public class RouteViewCursorAdapter extends RecyclerView.Adapter<RouteViewCursorAdapter.RouteViewHolder>{
     private static final String TAG = RouteViewCursorAdapter.class.getSimpleName();
+    private PublishSubject<Integer> subject = PublishSubject.create();
     private Cursor mCursor;
 
     public RouteViewCursorAdapter(Cursor cursor){
@@ -39,13 +43,20 @@ public class RouteViewCursorAdapter extends RecyclerView.Adapter<RouteViewCursor
     }
 
     @Override
-    public void onBindViewHolder(RouteViewCursorAdapter.RouteViewHolder holder, int position) {
+    public void onBindViewHolder(RouteViewCursorAdapter.RouteViewHolder holder, final int position) {
         Log.d(TAG, "[onBindViewHolder] Requested position = " + position);
         if(this.mCursor == null)
             return;
         mCursor.moveToPosition(position);
-        int id = mCursor.getInt(0);
+        final int id = mCursor.getInt(0);
         holder.mRouteIdTxt.setText("RouteId" + id);
+
+        holder.itemView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                subject.onNext(id);
+            }
+        });
     }
 
     @Override
@@ -60,5 +71,9 @@ public class RouteViewCursorAdapter extends RecyclerView.Adapter<RouteViewCursor
         mCursor = cursor;
         mCursor.moveToFirst();
         this.notifyDataSetChanged();
+    }
+
+    public Observable<Integer> getPositionClicks(){
+        return subject.asObservable();
     }
 }

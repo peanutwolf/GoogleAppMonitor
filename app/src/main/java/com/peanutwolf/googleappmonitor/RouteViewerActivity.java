@@ -10,7 +10,6 @@ import android.graphics.Rect;
 import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.FragmentActivity;
-import android.support.v4.app.FragmentManager;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -22,8 +21,8 @@ import com.peanutwolf.googleappmonitor.Adapters.RouteViewCursorAdapter;
 import com.peanutwolf.googleappmonitor.Adapters.RouteViewsAdapter;
 import com.peanutwolf.googleappmonitor.Database.ShakeDBContentProvider;
 import com.peanutwolf.googleappmonitor.Database.ShakeDatabase;
-import com.peanutwolf.googleappmonitor.Fragments.RouteViewDialog;
-import com.peanutwolf.googleappmonitor.Models.ShakePointModel;
+import com.peanutwolf.googleappmonitor.Fragments.TrekViewDialog;
+import com.peanutwolf.googleappmonitor.Models.ShakePointPOJO;
 import com.peanutwolf.googleappmonitor.Models.TrekModel;
 
 import java.util.LinkedHashMap;
@@ -31,6 +30,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import rx.Subscription;
 import rx.functions.Action1;
 
 /**
@@ -41,9 +41,16 @@ public class RouteViewerActivity extends FragmentActivity {
     private static final String TAG = RouteViewerActivity.class.getSimpleName();
     private RecyclerView recyclerView;
     private List<TrekModel> mTreksList;
-    private Map<Integer, List<ShakePointModel>> mRoutesMap;
+    private Map<Integer, List<ShakePointPOJO>> mRoutesMap;
     private RouteViewsAdapter mAdapter;
     private RouteViewCursorAdapter mCursorAdapter;
+    private Subscription mAdapterClickHandler;
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        mAdapterClickHandler.unsubscribe();
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -65,37 +72,28 @@ public class RouteViewerActivity extends FragmentActivity {
         recyclerView.addItemDecoration(new GridSpacingItemDecoration(2, dpToPx(10), true));
         recyclerView.setItemAnimator(new DefaultItemAnimator());
         recyclerView.setAdapter(this.mCursorAdapter);
-//        recyclerView.setAdapter(this.mAdapter);
-
-/*        this.mAdapter.getPositionClicks().subscribe(new Action1<Integer>() {
+        mAdapterClickHandler = this.mCursorAdapter.getPositionClicks().subscribe(new Action1<Integer>() {
             @Override
-            public void call(Integer integer) {
-                Log.i(TAG, "Item Route clicked " + integer);
-                FragmentManager fm = getSupportFragmentManager();
-                RouteViewDialog routeViewDialog = RouteViewDialog.newInstance();
-                routeViewDialog.setRoutePoints(mRoutesMap.get(integer));
-                routeViewDialog.setStyle(DialogFragment.STYLE_NO_FRAME, R.style.RouteViewDialog);
-                routeViewDialog.show(fm, "fragment_route_view");
+            public void call(Integer trekId) {
+                DialogFragment routeViewFragment = TrekViewDialog.newInstance(trekId);
+                routeViewFragment.show(getSupportFragmentManager().beginTransaction(), "dialog");
             }
         });
 
-        prepareRoutes();*/
-
         this.getLoaderManager().initLoader(TREK_LOADER_ID, null, trekLoader);
-        this.getLoaderManager().restartLoader(TREK_LOADER_ID, null, trekLoader);
     }
 
     private void prepareRoutes(){
         ContentResolver resolver = this.getContentResolver();
-        Cursor cursor = resolver.query(ShakeDBContentProvider.CONTENT_URI, null, null, null, null);
+        Cursor cursor = resolver.query(ShakeDBContentProvider.CONTENT_SHAKES_URI, null, null, null, null);
 
         cursor.moveToFirst();
         if(cursor.getCount() == 0)
             return;
         do{
-            ShakePointModel model = new ShakePointModel(cursor);
+            ShakePointPOJO model = new ShakePointPOJO(cursor);
             if(mRoutesMap.get(model.getRouteId()) == null){
-                mRoutesMap.put(model.getRouteId(), new LinkedList<ShakePointModel>());
+                mRoutesMap.put(model.getRouteId(), new LinkedList<ShakePointPOJO>());
             }
             mRoutesMap.get(model.getRouteId()).add(model);
         }while (cursor.moveToNext());

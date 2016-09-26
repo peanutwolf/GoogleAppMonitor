@@ -1,7 +1,6 @@
 package com.peanutwolf.googleappmonitor.Fragments;
 
 import android.app.Fragment;
-import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.Paint;
@@ -11,12 +10,8 @@ import android.os.HandlerThread;
 import android.support.annotation.Nullable;
 import android.util.Log;
 import android.view.LayoutInflater;
-import android.view.Surface;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.WindowManager;
-import android.widget.Button;
-import android.widget.TextView;
 
 import com.androidplot.xy.BoundaryMode;
 import com.androidplot.xy.LineAndPointFormatter;
@@ -26,12 +21,9 @@ import com.peanutwolf.googleappmonitor.BuildConfig;
 import com.peanutwolf.googleappmonitor.Database.AndroidDatabaseManager;
 import com.peanutwolf.googleappmonitor.MainActivity;
 import com.peanutwolf.googleappmonitor.Models.DynamicXYPlotModel;
-import com.peanutwolf.googleappmonitor.Models.ShakePointModel;
 import com.peanutwolf.googleappmonitor.R;
 import com.peanutwolf.googleappmonitor.Utilities.DynamicDataSourceLoop;
 import com.peanutwolf.googleappmonitor.Utilities.SimpleDynamicSeries;
-
-import org.w3c.dom.Text;
 
 /**
  * Created by vigursky on 11.05.2016.

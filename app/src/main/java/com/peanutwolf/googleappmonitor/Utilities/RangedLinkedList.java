@@ -1,8 +1,6 @@
 package com.peanutwolf.googleappmonitor.Utilities;
 
-import android.util.Log;
-
-import com.peanutwolf.googleappmonitor.Models.ShakePointModel;
+import com.peanutwolf.googleappmonitor.Models.ShakePointPOJO;
 
 import java.util.LinkedList;
 
@@ -34,12 +32,12 @@ public class RangedLinkedList<E> extends LinkedList<E> {
                 mSum -= ((Number)firstElement).intValue();
             }
             mAverage = mSum / this.size();
-        }else if(ShakePointModel.class.isInstance(object)){
+        }else if(ShakePointPOJO.class.isInstance(object)){
 
-            int val = ((int) ((ShakePointModel) object).getAccelerationValue());
+            int val = ((int) ((ShakePointPOJO) object).getAccelerationValue());
             mSum += val;
             if(firstElement != null){
-                val = (int) ((ShakePointModel)firstElement).getAccelerationValue();
+                val = (int) ((ShakePointPOJO)firstElement).getAccelerationValue();
                 mSum -= val;
             }
             mAverage = mSum / this.size();

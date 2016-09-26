@@ -10,7 +10,7 @@ import com.peanutwolf.googleappmonitor.Database.ShakeDatabase;
 /**
  * Created by vigursky on 10.04.2016.
  */
-public class ShakePointModel {
+public class ShakePointPOJO {
     private int  mRouteId = 0;
     private double mAxisAccelerationX = 0;
     private double mAxisAccelerationY = 0;
@@ -23,11 +23,11 @@ public class ShakePointModel {
     private float mCurrentSpeed = 0.0F;
     private long mCurrentTimestamp  = 0L;
 
-    public ShakePointModel(){
+    public ShakePointPOJO(){
 
     }
 
-    public ShakePointModel(final Cursor cursor){
+    public ShakePointPOJO(final Cursor cursor){
         this.dataToModel(cursor);
     }
 

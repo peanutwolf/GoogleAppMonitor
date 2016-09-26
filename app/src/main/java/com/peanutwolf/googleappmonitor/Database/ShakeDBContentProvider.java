@@ -25,7 +25,7 @@ public class ShakeDBContentProvider extends ContentProvider {
 
     private static final String BASE_PATH = "shakes";
     private static final String TREK_PATH = "treks";
-    public static final Uri CONTENT_URI = Uri.parse("content://" + AUTHORITY
+    public static final Uri CONTENT_SHAKES_URI = Uri.parse("content://" + AUTHORITY
             + "/" + BASE_PATH);
 
     public static final Uri CONTENT_TREK_URI = Uri.parse("content://" + AUTHORITY

@@ -15,7 +15,7 @@ import android.os.HandlerThread;
 import android.os.IBinder;
 import android.util.Log;
 
-import com.peanutwolf.googleappmonitor.Models.ShakePointModel;
+import com.peanutwolf.googleappmonitor.Models.ShakePointPOJO;
 import com.peanutwolf.googleappmonitor.Models.TrekModel;
 import com.peanutwolf.googleappmonitor.Services.Interfaces.LocationServiceDataSource;
 import com.peanutwolf.googleappmonitor.Services.Interfaces.ShakeServiceDataSource;
@@ -24,7 +24,7 @@ import com.peanutwolf.googleappmonitor.Utilities.RangedLinkedList;
 import java.util.LinkedList;
 import java.util.List;
 
-public class ShakeSensorService extends Service implements SensorEventListener, ShakeServiceDataSource<ShakePointModel> {
+public class ShakeSensorService extends Service implements SensorEventListener, ShakeServiceDataSource<ShakePointPOJO> {
     public static final String TAG = ShakeSensorService.class.getName()+"Service";
     private static final  int DOMAIN_WIDTH = 100;
     private SensorManager mSensorMgr;
@@ -34,7 +34,7 @@ public class ShakeSensorService extends Service implements SensorEventListener, 
     private long mLastTime_db;
     private HandlerThread thread;
     private final Binder mBinder = new ShakeSensorBinder();
-    private List<ShakePointModel> mSensorViewData;
+    private List<ShakePointPOJO> mSensorViewData;
     private boolean mShakeStarted = false;
     private Thread mUpdaterThread;
     private LocationServiceDataSource mLocationServiceDataSource;
@@ -90,7 +90,7 @@ public class ShakeSensorService extends Service implements SensorEventListener, 
     @Override
     public void onSensorChanged(SensorEvent event) {
         long now = System.currentTimeMillis();
-        ShakePointModel shakePoint = new ShakePointModel();
+        ShakePointPOJO shakePoint = new ShakePointPOJO();
         shakePoint.dataToModel(event);
         if(mLocationServiceDataSource != null){
             shakePoint.setCurrentLatLng(mLocationServiceDataSource.getLastKnownLatLng());
@@ -114,7 +114,7 @@ public class ShakeSensorService extends Service implements SensorEventListener, 
 
     }
 
-    private synchronized void writeToDB(ShakePointModel shakePoint){
+    private synchronized void writeToDB(ShakePointPOJO shakePoint){
         if(mAllowSaving == true)
             mDataSaverSource.saveShakePoint(mCurrentTrek.getId(), shakePoint);
     }
@@ -138,7 +138,7 @@ public class ShakeSensorService extends Service implements SensorEventListener, 
     }
 
     @Override
-    public LinkedList<ShakePointModel> getAccelerationData() {
+    public LinkedList<ShakePointPOJO> getAccelerationData() {
         synchronized (mSensorViewData) {
             return new LinkedList<>(mSensorViewData);
         }

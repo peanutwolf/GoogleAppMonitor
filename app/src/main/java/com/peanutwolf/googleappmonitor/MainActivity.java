@@ -20,13 +20,13 @@ import android.widget.TextView;
 
 import com.peanutwolf.googleappmonitor.Database.ShakeDBContentProvider;
 import com.peanutwolf.googleappmonitor.Fragments.MapViewFragment;
-import com.peanutwolf.googleappmonitor.Models.ShakePointModel;
+import com.peanutwolf.googleappmonitor.Models.ShakePointPOJO;
 import com.peanutwolf.googleappmonitor.Services.Interfaces.ShakeServiceDataSource;
 import com.peanutwolf.googleappmonitor.Services.ShakeSensorService;
 
 import java.util.LinkedList;
 
-public class MainActivity extends AppCompatActivity implements ShakeServiceDataSource<ShakePointModel>, View.OnClickListener, MapViewFragment.iMapCallback {
+public class MainActivity extends AppCompatActivity implements ShakeServiceDataSource<ShakePointPOJO>, View.OnClickListener, MapViewFragment.iMapCallback {
     public static final String TAG = MainActivity.class.getName();
     private Intent mShakeServiceIntent;
     private ShakeSensorService mShakeSensorService;
@@ -97,11 +97,11 @@ public class MainActivity extends AppCompatActivity implements ShakeServiceDataS
     };
 
     @Override
-    public LinkedList<ShakePointModel> getAccelerationData() {
+    public LinkedList<ShakePointPOJO> getAccelerationData() {
         if(mShakeSensorService != null){
-            LinkedList<ShakePointModel> accelerationData = mShakeSensorService.getAccelerationData();
+            LinkedList<ShakePointPOJO> accelerationData = mShakeSensorService.getAccelerationData();
             if(!accelerationData.isEmpty() && BuildConfig.DEBUG){
-                ShakePointModel lastPoint = accelerationData.getLast();
+                ShakePointPOJO lastPoint = accelerationData.getLast();
                 mShakeSensorAxisTxt.setText("x:"+lastPoint.getAxisAccelerationX()+"\n"+
                                             "y:"+lastPoint.getAxisAccelerationY()+"\n"+
                                             "z:"+lastPoint.getAxisAccelerationZ());
@@ -132,7 +132,7 @@ public class MainActivity extends AppCompatActivity implements ShakeServiceDataS
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.action_clear_treks:
-                int deletedRows = getContentResolver().delete(ShakeDBContentProvider.CONTENT_URI, null,null);
+                int deletedRows = getContentResolver().delete(ShakeDBContentProvider.CONTENT_SHAKES_URI, null,null);
                 AlertDialog alertDialog = new AlertDialog.Builder(MainActivity.this).create();
                 alertDialog.setTitle("Clear treks");
                 alertDialog.setButton(AlertDialog.BUTTON_NEUTRAL, "OK",

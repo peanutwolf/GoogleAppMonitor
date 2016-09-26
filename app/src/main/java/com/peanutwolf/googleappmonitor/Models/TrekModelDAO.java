@@ -13,6 +13,9 @@ import com.peanutwolf.googleappmonitor.Services.DataSaverService;
 import java.util.ArrayList;
 import java.util.List;
 
+import rx.Observable;
+import rx.Subscriber;
+
 /**
  * Created by vigursky on 07.09.2016.
  */
@@ -41,6 +44,16 @@ public class TrekModelDAO {
         }
 
         return treks;
+    }
+
+    public Observable<List<TrekModel>> asObservable() {
+        return Observable.create(new Observable.OnSubscribe<List<TrekModel>>() {
+            @Override
+            public void call(Subscriber<? super List<TrekModel>> subscriber) {
+                subscriber.onNext(getTrekModels());
+                subscriber.onCompleted();
+            }
+        });
     }
 
 }

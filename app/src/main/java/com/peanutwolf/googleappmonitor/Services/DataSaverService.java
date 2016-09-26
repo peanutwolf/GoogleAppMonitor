@@ -4,7 +4,6 @@ import android.app.Service;
 import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Intent;
-import android.database.Cursor;
 import android.net.Uri;
 import android.os.Binder;
 import android.os.Handler;
@@ -12,18 +11,13 @@ import android.os.HandlerThread;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
-import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.util.Log;
 
 import com.peanutwolf.googleappmonitor.Database.ShakeDBContentProvider;
 import com.peanutwolf.googleappmonitor.Database.ShakeDatabase;
-import com.peanutwolf.googleappmonitor.Models.ShakePointModel;
+import com.peanutwolf.googleappmonitor.Models.ShakePointPOJO;
 import com.peanutwolf.googleappmonitor.Models.TrekModel;
 import com.peanutwolf.googleappmonitor.Models.TrekModelDAO;
-import com.peanutwolf.googleappmonitor.Utilities.DynamicDataSourceLoop;
-
-import java.util.List;
 
 
 /**
@@ -77,7 +71,7 @@ public class DataSaverService extends Service {
     }
 
 
-    public void saveShakePoint(int trekID, ShakePointModel shakeModel){
+    public void saveShakePoint(int trekID, ShakePointPOJO shakeModel){
         ContentValues values = new ContentValues();
         values.put(ShakeDatabase.COLUMN_AXISACCELX, shakeModel.getAxisAccelerationX() + "");
         values.put(ShakeDatabase.COLUMN_AXISACCELY, shakeModel.getAxisAccelerationY() + "");
@@ -90,7 +84,7 @@ public class DataSaverService extends Service {
         values.put(ShakeDatabase.COLUMN_SPEED,      shakeModel.getCurrentSpeed() + "");
         values.put(ShakeDatabase.COLUMN_TIMESTAMP,  shakeModel.getCurrentTimestamp() + "");
         values.put(ShakeDatabase.COLUMN_TREKID,     trekID + "");
-        mContentResolver.insert(ShakeDBContentProvider.CONTENT_URI, values);
+        mContentResolver.insert(ShakeDBContentProvider.CONTENT_SHAKES_URI, values);
     }
 
     public int saveTrekModel(TrekModel trek){

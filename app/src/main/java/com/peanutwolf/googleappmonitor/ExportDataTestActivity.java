@@ -1,6 +1,5 @@
 package com.peanutwolf.googleappmonitor;
 
-import android.app.Application;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -198,7 +197,7 @@ public class ExportDataTestActivity extends AppCompatActivity implements View.On
     private JSONObject exportShakeData() throws JSONException {
         JSONObject jsonObject = new JSONObject();
         ContentResolver mContentResolver =  getContentResolver();
-        Cursor cursor = mContentResolver.query(ShakeDBContentProvider.CONTENT_URI, null, null, null, null);
+        Cursor cursor = mContentResolver.query(ShakeDBContentProvider.CONTENT_SHAKES_URI, null, null, null, null);
         if (cursor != null) {
             JSONObject jsonRecord;
             JSONArray jsonArray = new JSONArray();
