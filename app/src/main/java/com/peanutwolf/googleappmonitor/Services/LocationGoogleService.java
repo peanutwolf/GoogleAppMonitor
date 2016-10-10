@@ -20,6 +20,10 @@ import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.model.LatLng;
 import com.peanutwolf.googleappmonitor.Services.Interfaces.LocationServiceDataSource;
 
+import rx.Observable;
+import rx.Subscriber;
+
+
 /**
  * Created by pEANUTwOLF on 13.05.2016.
  */
@@ -30,7 +34,7 @@ public class LocationGoogleService extends Service implements GoogleApiClient.Co
     private Location mLocation;
     private LocationServiceBinder mBinder;
     private LocationListener mLocationListenerExt;
-    private boolean connected = false;
+    private Subscriber<? super Location> mLocationSubscriber;
 
     @Nullable
     @Override
@@ -61,7 +65,6 @@ public class LocationGoogleService extends Service implements GoogleApiClient.Co
 
     @Override
     public void onConnected(@Nullable Bundle bundle){
-        connected = true;
         startLocationUpdates();
     }
 
@@ -95,8 +98,20 @@ public class LocationGoogleService extends Service implements GoogleApiClient.Co
 
     @Override
     public void onLocationChanged(Location location){
-        mLocationListenerExt.onLocationChanged(location);
         mLocation = location;
+        if(mLocationListenerExt != null)
+            mLocationListenerExt.onLocationChanged(location);
+        if(mLocationSubscriber != null)
+            mLocationSubscriber.onNext(location);
+    }
+
+    public Observable<Location> getObservable(){
+        return Observable.create(new Observable.OnSubscribe<Location>() {
+            @Override
+            public void call(Subscriber<? super Location> subscriber) {
+                mLocationSubscriber = subscriber;
+            }
+        });
     }
 
     @NonNull

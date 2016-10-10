@@ -4,7 +4,12 @@ import android.app.Dialog;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.database.Cursor;
+import android.graphics.Bitmap;
+import android.graphics.BitmapShader;
 import android.graphics.Color;
+import android.graphics.LinearGradient;
+import android.graphics.Paint;
+import android.graphics.Shader;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -168,6 +173,7 @@ public class TrekViewDialog extends DialogFragment implements OpenStreetMapConst
             geoPoints.add(geoPoint);
         }
 
+        track.setGeodesic(true);
         track.setPoints(geoPoints);
         return track;
     }
@@ -180,7 +186,14 @@ public class TrekViewDialog extends DialogFragment implements OpenStreetMapConst
 
         mTrekPolyline = TrekViewDialog.this.prepareTrack(pointsList);
         mTrekPolyline.setVisible(true);
-        mTrekPolyline.setColor(Color.GREEN);
+//        mTrekPolyline.setColor(Color.GREEN);
+        Paint paint = mTrekPolyline.getPaint();
+        Bitmap bitmap = Bitmap.createBitmap(500, 500, Bitmap.Config.ARGB_8888);
+        bitmap.eraseColor(Color.RED);
+//        paint.setShader(new BitmapShader(bitmap, Shader.TileMode.REPEAT, Shader.TileMode.REPEAT));
+        Shader shader1 = new LinearGradient(0, 0, 0, 10 /*canvas height*/, new int[]{Color.GREEN}, new float[]{0}, Shader.TileMode.MIRROR );
+        Shader shader2 = new LinearGradient(0, 10, 0, 20 /*canvas height*/, new int[]{Color.GREEN}, new float[]{0}, Shader.TileMode.MIRROR );
+        //paint.setShader(new LinearGradient(0, 0, 0, 128 /*canvas height*/, new int[]{Color.GREEN, Color.BLUE, Color.BLACK, Color.WHITE}, new float[]{0,0.5f,.55f,1}, Shader.TileMode.MIRROR ));
         mMapView.getOverlays().add(mTrekPolyline);
     }
 

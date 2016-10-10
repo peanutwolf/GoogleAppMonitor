@@ -17,9 +17,11 @@ import android.util.Log;
 
 import com.peanutwolf.googleappmonitor.Models.ShakePointPOJO;
 import com.peanutwolf.googleappmonitor.Models.TrekModel;
+import com.peanutwolf.googleappmonitor.Processors.ShakePointProcessor;
 import com.peanutwolf.googleappmonitor.Services.Interfaces.LocationServiceDataSource;
 import com.peanutwolf.googleappmonitor.Services.Interfaces.ShakeServiceDataSource;
 import com.peanutwolf.googleappmonitor.Utilities.RangedLinkedList;
+import com.peanutwolf.googleappmonitor.Processors.LocationPointProcessor;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -42,8 +44,9 @@ public class ShakeSensorService extends Service implements SensorEventListener, 
     private Intent mLocationGoogleServiceIntent;
     private Intent mDataSaverServiceIntent;
     private boolean mAllowSaving = false;
-    private int mRouteId;
     private TrekModel mCurrentTrek;
+    private LocationPointProcessor mLocationPointProcessor;
+    private ShakePointProcessor mShakePointProcessor;
 
     @Override
     public IBinder onBind(Intent intent) {
@@ -53,6 +56,10 @@ public class ShakeSensorService extends Service implements SensorEventListener, 
     @Override
     public void onCreate() {
         super.onCreate();
+
+        mLocationPointProcessor = new LocationPointProcessor();
+        mShakePointProcessor = new ShakePointProcessor();
+
         mSensorViewData = new RangedLinkedList<>(DOMAIN_WIDTH);
         mUpdaterThread = new Thread(new SupportSensorUpdater());
         mUpdaterThread.start();
@@ -97,13 +104,17 @@ public class ShakeSensorService extends Service implements SensorEventListener, 
             shakePoint.setCurrentSpeed(mLocationServiceDataSource.getSpeed());
         }
 
+        mLocationPointProcessor.addPoint(shakePoint);
+        mShakePointProcessor.addPoint(shakePoint);
+
         if((now - mLastTime) > TIME_THRESHOLD){
             synchronized(mSensorViewData){
                 mSensorViewData.add(shakePoint);
             }
             mLastTime = now;
         }
-        if((now - mLastTime_db) > TIME_THRESHOLD_DB){
+        if((now - mLastTime_db) > TIME_THRESHOLD_DB
+                && (mShakePointProcessor.needToWrite() || mLocationPointProcessor.needToWrite())){
             writeToDB(shakePoint);
             mLastTime_db = now;
         }
