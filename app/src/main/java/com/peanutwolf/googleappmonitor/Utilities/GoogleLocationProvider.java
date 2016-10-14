@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.content.ServiceConnection;
 import android.location.Location;
 import android.os.IBinder;
+import android.util.Log;
 
 import com.google.android.gms.location.LocationListener;
 import com.peanutwolf.googleappmonitor.Services.Interfaces.LocationServiceDataSource;
@@ -18,7 +19,7 @@ import org.osmdroid.views.overlay.mylocation.IMyLocationProvider;
  * Created by vigursky on 08.08.2016.
  */
 public class GoogleLocationProvider implements IMyLocationProvider {
-
+    public static final String TAG = GoogleLocationProvider.class.getSimpleName();
     private final Context mContext;
     private LocationServiceDataSource mLocationServiceDataSource;
     private MyLocationListenerBridge mLocationListenerBridge;
@@ -42,6 +43,7 @@ public class GoogleLocationProvider implements IMyLocationProvider {
     
     @Override
     public boolean startLocationProvider(IMyLocationConsumer myLocationConsumer) {
+        Log.d(TAG, "[startLocationProvider] Google location provider is starting");
         mLocationListenerBridge = new MyLocationListenerBridge(myLocationConsumer);
         return mContext.bindService(new Intent(mContext, LocationGoogleService.class), mLocationConnector, Context.BIND_AUTO_CREATE);
     }
@@ -56,12 +58,13 @@ public class GoogleLocationProvider implements IMyLocationProvider {
 
         @Override
         public void onServiceDisconnected(ComponentName name) {
-
+            mLocationServiceDataSource.setLocationListener(null);
         }
     };
 
     @Override
     public void stopLocationProvider() {
+        Log.d(TAG, "[stopLocationProvider] Google location provider is stopping");
         if (mLocationConnector != null)
             mContext.unbindService(mLocationConnector);
     }

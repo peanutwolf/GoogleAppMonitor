@@ -51,7 +51,7 @@ public class ShakePointDAO {
             @Override
             public void call(Subscriber<? super List<ShakePointPOJO>> subscriber) {
                 subscriber.onNext(getShakePoints(trekId));
-                subscriber.onCompleted();
+                subscriber.unsubscribe();
             }
         });
     }

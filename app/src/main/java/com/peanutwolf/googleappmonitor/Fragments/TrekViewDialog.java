@@ -50,7 +50,6 @@ public class TrekViewDialog extends DialogFragment implements OpenStreetMapConst
 
     public static final String TAG = TrekViewDialog.class.getSimpleName();
     private static final String TREK_ID_ARG = "TREK_ID";
-    private static final int SHAKE_LOADER_ID = 1;
     private Button dismissWindow;
     private MapView mMapView;
     private List<ShakePointPOJO> mRoutePointsList;
@@ -147,7 +146,8 @@ public class TrekViewDialog extends DialogFragment implements OpenStreetMapConst
     @Override
     public void onDestroyView() {
         super.onDestroyView();
-        mShakeSubscriptionHandle.unsubscribe();
+        if(!mShakeSubscriptionHandle.isUnsubscribed())
+            mShakeSubscriptionHandle.unsubscribe();
     }
 
     @NonNull
@@ -165,16 +165,21 @@ public class TrekViewDialog extends DialogFragment implements OpenStreetMapConst
 
     @NonNull
     private Polyline prepareTrack(@NonNull List<? extends ShakePointPOJO> routePointsList){
+        double lat_prev = 0 , lng_prev = 0;
         Polyline track = new Polyline(this.getActivity());
         List<GeoPoint> geoPoints = new ArrayList<>();
 
         for(ShakePointPOJO shakePointModel : routePointsList){
+            if(lat_prev == shakePointModel.getCurrentLatitude() && lng_prev == shakePointModel.getCurrentLongitude())
+                continue;
             GeoPoint geoPoint = new GeoPoint(shakePointModel.getCurrentLatitude(), shakePointModel.getCurrentLongitude());
             geoPoints.add(geoPoint);
+            lat_prev = shakePointModel.getCurrentLatitude();
+            lng_prev = shakePointModel.getCurrentLongitude();
         }
 
-        track.setGeodesic(true);
         track.setPoints(geoPoints);
+
         return track;
     }
 
@@ -186,14 +191,7 @@ public class TrekViewDialog extends DialogFragment implements OpenStreetMapConst
 
         mTrekPolyline = TrekViewDialog.this.prepareTrack(pointsList);
         mTrekPolyline.setVisible(true);
-//        mTrekPolyline.setColor(Color.GREEN);
-        Paint paint = mTrekPolyline.getPaint();
-        Bitmap bitmap = Bitmap.createBitmap(500, 500, Bitmap.Config.ARGB_8888);
-        bitmap.eraseColor(Color.RED);
-//        paint.setShader(new BitmapShader(bitmap, Shader.TileMode.REPEAT, Shader.TileMode.REPEAT));
-        Shader shader1 = new LinearGradient(0, 0, 0, 10 /*canvas height*/, new int[]{Color.GREEN}, new float[]{0}, Shader.TileMode.MIRROR );
-        Shader shader2 = new LinearGradient(0, 10, 0, 20 /*canvas height*/, new int[]{Color.GREEN}, new float[]{0}, Shader.TileMode.MIRROR );
-        //paint.setShader(new LinearGradient(0, 0, 0, 128 /*canvas height*/, new int[]{Color.GREEN, Color.BLUE, Color.BLACK, Color.WHITE}, new float[]{0,0.5f,.55f,1}, Shader.TileMode.MIRROR ));
+        mTrekPolyline.setColor(Color.GREEN);
         mMapView.getOverlays().add(mTrekPolyline);
     }
 

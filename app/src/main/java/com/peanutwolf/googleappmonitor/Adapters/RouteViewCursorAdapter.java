@@ -10,6 +10,11 @@ import android.widget.TextView;
 
 import com.peanutwolf.googleappmonitor.R;
 
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
 import rx.Observable;
 import rx.subjects.PublishSubject;
 
@@ -18,11 +23,24 @@ import rx.subjects.PublishSubject;
  */
 public class RouteViewCursorAdapter extends RecyclerView.Adapter<RouteViewCursorAdapter.RouteViewHolder>{
     private static final String TAG = RouteViewCursorAdapter.class.getSimpleName();
+    public Set<Integer> mRemovedItemsSwap = new HashSet<>();
+    private RecyclerView.AdapterDataObserver mDataChangeObserver;
     private PublishSubject<Integer> subject = PublishSubject.create();
     private Cursor mCursor;
 
     public RouteViewCursorAdapter(Cursor cursor){
         mCursor = cursor;
+
+        mDataChangeObserver =  new RecyclerView.AdapterDataObserver() {
+            @Override
+            public void onItemRangeRemoved(int positionStart, int itemCount) {
+                Log.d(TAG, "[onItemRangeRemoved] positionStart=" + positionStart + " itemCount = " + itemCount);
+                for (int i = positionStart; i < itemCount + positionStart; i++)
+                    mRemovedItemsSwap.add(i);
+            }
+        };
+
+        this.registerAdapterDataObserver(mDataChangeObserver);
     }
 
     public class RouteViewHolder extends RecyclerView.ViewHolder{
@@ -45,8 +63,10 @@ public class RouteViewCursorAdapter extends RecyclerView.Adapter<RouteViewCursor
     @Override
     public void onBindViewHolder(RouteViewCursorAdapter.RouteViewHolder holder, final int position) {
         Log.d(TAG, "[onBindViewHolder] Requested position = " + position);
-        if(this.mCursor == null)
+        if (this.mCursor == null){
             return;
+        }
+
         mCursor.moveToPosition(position);
         final int id = mCursor.getInt(0);
         holder.mRouteIdTxt.setText("RouteId" + id);
@@ -61,16 +81,39 @@ public class RouteViewCursorAdapter extends RecyclerView.Adapter<RouteViewCursor
 
     @Override
     public int getItemCount() {
+        int itemCount;
+
         if(mCursor == null)
-            return 0;
+            itemCount =  0;
         else
-            return mCursor.getCount();
+            itemCount =  mCursor.getCount() - mRemovedItemsSwap.size();
+
+        Log.d(TAG, "[getItemCount] count = " + itemCount);
+
+        return itemCount;
     }
 
     public void swapCursor(Cursor cursor){
+        Log.d(TAG, "[swapCursor]");
+        mRemovedItemsSwap.clear();
+        if(mCursor != null) {
+            Log.d(TAG, "[swapCursor] closing old cursor");
+            mCursor.close();
+        }
         mCursor = cursor;
-        mCursor.moveToFirst();
-        this.notifyDataSetChanged();
+    }
+
+    public int getTrekId(final int position){
+        mCursor.moveToPosition(position);
+        final int id = mCursor.getInt(0);
+        return id;
+    }
+
+    @Override
+    public void onDetachedFromRecyclerView(RecyclerView recyclerView) {
+        Log.d(TAG, "[onDetachedFromRecyclerView]");
+        super.onDetachedFromRecyclerView(recyclerView);
+        this.unregisterAdapterDataObserver(mDataChangeObserver);
     }
 
     public Observable<Integer> getPositionClicks(){

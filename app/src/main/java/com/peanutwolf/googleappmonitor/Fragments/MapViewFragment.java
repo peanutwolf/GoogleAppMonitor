@@ -108,8 +108,6 @@ public class MapViewFragment extends Fragment implements DynamicDataSourceLoop.i
         final Context context = this.getActivity();
         final DisplayMetrics dm = context.getResources().getDisplayMetrics();
 
-
-
         mPrefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
 
         this.mLocationOverlay = new MyLocationNewOverlay(new GoogleLocationProvider(context),mMapView);
@@ -147,9 +145,12 @@ public class MapViewFragment extends Fragment implements DynamicDataSourceLoop.i
         mLocationOverlay.runOnFirstFix(new Runnable() {
             @Override
             public void run() {
+                Log.d(TAG, "[runOnFirstFix] Location changed first time");
+                Log.d(TAG, "[runOnFirstFix]  MapViewFragment.this.getActivity() = " +  MapViewFragment.this.getActivity());
                 MapViewFragment.this.getActivity().runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
+                        Log.d(TAG, "[runOnUiThread] mMapCallback = " + mMapCallback);
                         mMapCallback.onMapCommand(MyMapCommands.LOCATION_ENABLED);
                     }
                 });
@@ -183,9 +184,6 @@ public class MapViewFragment extends Fragment implements DynamicDataSourceLoop.i
     @Override
     public void onDestroyView(){
         super.onDestroyView();
-        //this part terminates all of the overlays and background threads for osmdroid
-        //only needed when you programmatically create the map
-//        mMapView.onDetach();
     }
 
     @Override

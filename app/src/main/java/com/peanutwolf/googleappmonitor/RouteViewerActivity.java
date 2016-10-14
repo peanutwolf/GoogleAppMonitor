@@ -15,8 +15,10 @@ import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.util.TypedValue;
+import android.view.MotionEvent;
 import android.view.View;
 
+import com.github.brnunes.swipeablerecyclerview.SwipeableRecyclerViewTouchListener;
 import com.peanutwolf.googleappmonitor.Adapters.RouteViewCursorAdapter;
 import com.peanutwolf.googleappmonitor.Adapters.RouteViewsAdapter;
 import com.peanutwolf.googleappmonitor.Database.ShakeDBContentProvider;
@@ -24,6 +26,7 @@ import com.peanutwolf.googleappmonitor.Database.ShakeDatabase;
 import com.peanutwolf.googleappmonitor.Fragments.TrekViewDialog;
 import com.peanutwolf.googleappmonitor.Models.ShakePointPOJO;
 import com.peanutwolf.googleappmonitor.Models.TrekModel;
+import com.peanutwolf.googleappmonitor.Models.TrekModelDAO;
 
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
@@ -40,9 +43,7 @@ public class RouteViewerActivity extends FragmentActivity {
     public static final int TREK_LOADER_ID = 1;
     private static final String TAG = RouteViewerActivity.class.getSimpleName();
     private RecyclerView recyclerView;
-    private List<TrekModel> mTreksList;
     private Map<Integer, List<ShakePointPOJO>> mRoutesMap;
-    private RouteViewsAdapter mAdapter;
     private RouteViewCursorAdapter mCursorAdapter;
     private Subscription mAdapterClickHandler;
 
@@ -58,13 +59,12 @@ public class RouteViewerActivity extends FragmentActivity {
 
         setContentView(R.layout.activity_route_view);
 
-        TrekLoader trekLoader = new TrekLoader();
+        final TrekLoader trekLoader = new TrekLoader();
 
         this.recyclerView = (RecyclerView) findViewById(R.id.recview_routes);
 
         this.mRoutesMap = new LinkedHashMap<>();
 
-        this.mAdapter = new RouteViewsAdapter(this, this.mRoutesMap);
         this.mCursorAdapter = new RouteViewCursorAdapter(null);
 
         RecyclerView.LayoutManager mLayoutManager = new GridLayoutManager(this, 2);
@@ -79,6 +79,43 @@ public class RouteViewerActivity extends FragmentActivity {
                 routeViewFragment.show(getSupportFragmentManager().beginTransaction(), "dialog");
             }
         });
+
+        SwipeableRecyclerViewTouchListener swipeTouchListener =
+                new SwipeableRecyclerViewTouchListener(recyclerView,
+                        new SwipeableRecyclerViewTouchListener.SwipeListener() {
+                            TrekModelDAO trekModelDAO = new TrekModelDAO(RouteViewerActivity.this);
+                            @Override
+                            public boolean canSwipeLeft(int position) {
+                                return true;
+                            }
+
+                            @Override
+                            public boolean canSwipeRight(int position) {
+                                return true;
+                            }
+
+                            @Override
+                            public void onDismissedBySwipeLeft(RecyclerView recyclerView, int[] reverseSortedPositions) {
+                                for (int position : reverseSortedPositions) {
+                                    trekModelDAO.removeTrek(mCursorAdapter.getTrekId(position));
+                                    mCursorAdapter.notifyItemRemoved(position);
+                                }
+                                mCursorAdapter.notifyDataSetChanged();
+                                RouteViewerActivity.this.getLoaderManager().restartLoader(TREK_LOADER_ID, null, trekLoader);
+                            }
+
+                            @Override
+                            public void onDismissedBySwipeRight(RecyclerView recyclerView, int[] reverseSortedPositions) {
+                                for (int position : reverseSortedPositions) {
+                                    trekModelDAO.removeTrek(mCursorAdapter.getTrekId(position));
+                                    mCursorAdapter.notifyItemRemoved(position);
+                                }
+                                mCursorAdapter.notifyDataSetChanged();
+                                RouteViewerActivity.this.getLoaderManager().restartLoader(TREK_LOADER_ID, null, trekLoader);
+                            }
+                        });
+
+        recyclerView.addOnItemTouchListener(swipeTouchListener);
 
         this.getLoaderManager().initLoader(TREK_LOADER_ID, null, trekLoader);
     }
@@ -147,9 +184,10 @@ public class RouteViewerActivity extends FragmentActivity {
 
     private class TrekLoader implements LoaderManager.LoaderCallbacks<Cursor> {
         private final String TAG = RouteViewerActivity.TAG + TrekLoader.class.getSimpleName();
+
         @Override
         public Loader<Cursor> onCreateLoader(int id, Bundle args) {
-            Log.d(TAG, "onCreateLoader");
+            Log.d(TAG, "[onCreateLoader]");
             CursorLoader loader = new CursorLoader(
                     RouteViewerActivity.this,
                     ShakeDBContentProvider.CONTENT_TREK_URI,
@@ -162,9 +200,9 @@ public class RouteViewerActivity extends FragmentActivity {
 
         @Override
         public void onLoadFinished(Loader<Cursor> loader, Cursor cursor) {
-            if(cursor == null || cursor.getCount() == 0)
-                return;
+            Log.d(TAG, "[onLoadFinished]");
             RouteViewerActivity.this.mCursorAdapter.swapCursor(cursor);
+            RouteViewerActivity.this.mCursorAdapter.notifyDataSetChanged();
         }
 
         @Override

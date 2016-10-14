@@ -59,8 +59,10 @@ public class LocationGoogleService extends Service implements GoogleApiClient.Co
     @Override
     public void onDestroy(){
         super.onDestroy();
-        LocationServices.FusedLocationApi.removeLocationUpdates(mGoogleApiClient, this);
-        mGoogleApiClient.disconnect();
+        if(mGoogleApiClient.isConnected()) {
+            LocationServices.FusedLocationApi.removeLocationUpdates(mGoogleApiClient, this);
+            mGoogleApiClient.disconnect();
+        }
     }
 
     @Override

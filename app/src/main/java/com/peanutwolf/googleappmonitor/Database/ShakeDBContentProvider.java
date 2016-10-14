@@ -41,14 +41,17 @@ public class ShakeDBContentProvider extends ContentProvider {
         sURIMatcher.addURI(AUTHORITY, BASE_PATH, SHAKES);
         sURIMatcher.addURI(AUTHORITY, TREK_PATH, TREKS);
         sURIMatcher.addURI(AUTHORITY, BASE_PATH + "/#", SHAKE_ID);
-        sURIMatcher.addURI(AUTHORITY, BASE_PATH + "/#", ROUTE_ID);
+        sURIMatcher.addURI(AUTHORITY, TREK_PATH + "/#", ROUTE_ID);
     }
 
     @Override
     public boolean onCreate() {
         database = new ShakeDatabase(getContext());
         if(!isTableExists(database.getReadableDatabase(), ShakeDatabase.TABLE_SHAKE)){
-            database.onCreate(database.getWritableDatabase());
+            database.onUpgrade(database.getWritableDatabase(), 0, 0);
+        }
+        if(!isTableExists(database.getReadableDatabase(), ShakeDatabase.TABLE_TREK)){
+            database.onUpgrade(database.getWritableDatabase(), 0, 0);
         }
         return true;
     }
@@ -100,7 +103,7 @@ public class ShakeDBContentProvider extends ContentProvider {
     public Uri insert(Uri uri, ContentValues values) {
         int uriType = sURIMatcher.match(uri);
         SQLiteDatabase sqlDB = database.getWritableDatabase();
-        long id = 0;
+        long id;
         switch (uriType) {
             case SHAKES:
                 id = sqlDB.insert(ShakeDatabase.TABLE_SHAKE, null, values);
@@ -117,9 +120,23 @@ public class ShakeDBContentProvider extends ContentProvider {
 
     @Override
     public int delete(Uri uri, String selection, String[] selectionArgs) {
+        int deleted;
+        int uriType = sURIMatcher.match(uri);
         SQLiteDatabase sqlDB = database.getWritableDatabase();
-        database.onUpgrade(sqlDB, 1, 1);
-        return 0;
+
+        switch (uriType) {
+            case SHAKES:
+                deleted = sqlDB.delete(ShakeDatabase.TABLE_SHAKE, selection, selectionArgs);
+                break;
+            case TREKS:
+                deleted = sqlDB.delete(ShakeDatabase.TABLE_TREK, selection, selectionArgs);
+                break;
+            default:
+                throw new IllegalArgumentException("Unknown URI: " + uri);
+        }
+        getContext().getContentResolver().notifyChange(uri, null);
+
+        return deleted;
     }
 
     @Override

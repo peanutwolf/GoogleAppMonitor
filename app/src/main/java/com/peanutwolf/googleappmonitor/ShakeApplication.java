@@ -14,7 +14,6 @@ public class ShakeApplication extends MultiDexApplication {
 
     private Intent mShakeServiceIntent;
 
-
     @Override
     public void onCreate() {
         super.onCreate();
@@ -23,6 +22,5 @@ public class ShakeApplication extends MultiDexApplication {
             startService(mShakeServiceIntent);
         }
     }
-
 
 }

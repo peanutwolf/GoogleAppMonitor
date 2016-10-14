@@ -5,6 +5,7 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
+import android.util.Log;
 
 import com.peanutwolf.googleappmonitor.Database.ShakeDBContentProvider;
 import com.peanutwolf.googleappmonitor.Database.ShakeDatabase;
@@ -20,6 +21,7 @@ import rx.Subscriber;
  * Created by vigursky on 07.09.2016.
  */
 public class TrekModelDAO {
+    public static final String TAG = TrekModelDAO.class.getSimpleName()+"Class";
     private Context mContext;
 
     public TrekModelDAO(Context context){
@@ -43,7 +45,25 @@ public class TrekModelDAO {
             trekModel.setDistance(cursor.getString(2));
         }
 
+        cursor.close();
+
         return treks;
+    }
+
+    public int removeTrek(int trekId){
+        ContentResolver contentResolver = mContext.getContentResolver();
+
+        Log.d(TAG, "[removeTrek] trying to remove trekId = " + trekId);
+
+        int deleted = contentResolver.delete(ShakeDBContentProvider.CONTENT_SHAKES_URI,
+                ShakeDatabase.COLUMN_TREKID + "=?",
+                new String[] {String.valueOf(trekId)});
+
+        contentResolver.delete(ShakeDBContentProvider.CONTENT_TREK_URI,
+                ShakeDatabase.COLUMN_ID + "=?",
+                new String[] {String.valueOf(trekId)});
+
+        return deleted;
     }
 
     public Observable<List<TrekModel>> asObservable() {

@@ -17,6 +17,7 @@ import android.util.Log;
 
 import com.peanutwolf.googleappmonitor.Models.ShakePointPOJO;
 import com.peanutwolf.googleappmonitor.Models.TrekModel;
+import com.peanutwolf.googleappmonitor.Models.TrekModelDAO;
 import com.peanutwolf.googleappmonitor.Processors.ShakePointProcessor;
 import com.peanutwolf.googleappmonitor.Services.Interfaces.LocationServiceDataSource;
 import com.peanutwolf.googleappmonitor.Services.Interfaces.ShakeServiceDataSource;
