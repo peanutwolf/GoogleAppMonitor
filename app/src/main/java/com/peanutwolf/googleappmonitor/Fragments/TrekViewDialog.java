@@ -27,6 +27,7 @@ import com.peanutwolf.googleappmonitor.Database.ShakeDatabase;
 import com.peanutwolf.googleappmonitor.Models.ShakePointDAO;
 import com.peanutwolf.googleappmonitor.Models.ShakePointPOJO;
 import com.peanutwolf.googleappmonitor.R;
+import com.peanutwolf.googleappmonitor.Utilities.GradientPolyline;
 
 import org.osmdroid.util.BoundingBoxE6;
 import org.osmdroid.util.GeoPoint;
@@ -164,9 +165,9 @@ public class TrekViewDialog extends DialogFragment implements OpenStreetMapConst
     }
 
     @NonNull
-    private Polyline prepareTrack(@NonNull List<? extends ShakePointPOJO> routePointsList){
+    private Polyline prepareTrack(@NonNull List<ShakePointPOJO> routePointsList){
         double lat_prev = 0 , lng_prev = 0;
-        Polyline track = new Polyline(this.getActivity());
+        GradientPolyline track = new GradientPolyline(this.getActivity());
         List<GeoPoint> geoPoints = new ArrayList<>();
 
         for(ShakePointPOJO shakePointModel : routePointsList){
@@ -179,11 +180,12 @@ public class TrekViewDialog extends DialogFragment implements OpenStreetMapConst
         }
 
         track.setPoints(geoPoints);
+        track.setShakePoints(routePointsList);
 
         return track;
     }
 
-    private void drawTrekPoints(@NonNull List<? extends ShakePointPOJO> pointsList, boolean zoomToTrek){
+    private void drawTrekPoints(@NonNull List<ShakePointPOJO> pointsList, boolean zoomToTrek){
 
         if(zoomToTrek == true){
             this.zoomToTrekPoints(pointsList);

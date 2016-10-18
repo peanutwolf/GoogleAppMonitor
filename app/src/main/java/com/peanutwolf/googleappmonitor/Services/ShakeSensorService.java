@@ -37,7 +37,7 @@ public class ShakeSensorService extends Service implements SensorEventListener, 
     private long mLastTime_db;
     private HandlerThread thread;
     private final Binder mBinder = new ShakeSensorBinder();
-    private List<ShakePointPOJO> mSensorViewData;
+    private RangedLinkedList<ShakePointPOJO> mSensorViewData = new RangedLinkedList<>(DOMAIN_WIDTH);;
     private boolean mShakeStarted = false;
     private Thread mUpdaterThread;
     private LocationServiceDataSource mLocationServiceDataSource;
@@ -59,9 +59,8 @@ public class ShakeSensorService extends Service implements SensorEventListener, 
         super.onCreate();
 
         mLocationPointProcessor = new LocationPointProcessor();
-        mShakePointProcessor = new ShakePointProcessor();
+        mShakePointProcessor = new ShakePointProcessor(20);
 
-        mSensorViewData = new RangedLinkedList<>(DOMAIN_WIDTH);
         mUpdaterThread = new Thread(new SupportSensorUpdater());
         mUpdaterThread.start();
 
@@ -158,7 +157,8 @@ public class ShakeSensorService extends Service implements SensorEventListener, 
 
     @Override
     public int getAverageAccelerationData() {
-        return ((RangedLinkedList)mSensorViewData).getAverage();
+        return (int)mSensorViewData.getAverageType().getAccelerationValue();
+        //return ((RangedLinkedList)mSensorViewData).getAverage();
     }
 
 

@@ -23,6 +23,7 @@ public class GoogleLocationProvider implements IMyLocationProvider {
     private final Context mContext;
     private LocationServiceDataSource mLocationServiceDataSource;
     private MyLocationListenerBridge mLocationListenerBridge;
+    private boolean mRegistered = false;
 
     class MyLocationListenerBridge implements LocationListener{
         IMyLocationConsumer mMyLocationConsumer;
@@ -54,19 +55,24 @@ public class GoogleLocationProvider implements IMyLocationProvider {
         public void onServiceConnected(ComponentName name, IBinder service) {
             mLocationServiceDataSource = ((LocationGoogleService.LocationServiceBinder)service).getService();
             mLocationServiceDataSource.setLocationListener(mLocationListenerBridge);
+            mRegistered = true;
         }
 
         @Override
         public void onServiceDisconnected(ComponentName name) {
             mLocationServiceDataSource.setLocationListener(null);
+            mRegistered = false;
         }
     };
 
     @Override
     public void stopLocationProvider() {
         Log.d(TAG, "[stopLocationProvider] Google location provider is stopping");
-        if (mLocationConnector != null)
+        if (mLocationConnector != null && mRegistered){
             mContext.unbindService(mLocationConnector);
+            mRegistered = false;
+        }
+
     }
 
     @Override

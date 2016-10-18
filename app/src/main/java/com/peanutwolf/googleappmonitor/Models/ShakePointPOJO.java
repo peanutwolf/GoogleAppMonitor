@@ -6,11 +6,12 @@ import android.hardware.SensorEvent;
 
 import com.google.android.gms.maps.model.LatLng;
 import com.peanutwolf.googleappmonitor.Database.ShakeDatabase;
+import com.peanutwolf.googleappmonitor.Processors.AverageProcessor;
 
 /**
  * Created by vigursky on 10.04.2016.
  */
-public class ShakePointPOJO {
+public class ShakePointPOJO implements AverageProcessor<ShakePointPOJO> {
     private int  mRouteId = 0;
     private double mAxisAccelerationX = 0;
     private double mAxisAccelerationY = 0;
@@ -59,6 +60,10 @@ public class ShakePointPOJO {
         return mCurrentLatitude;
     }
 
+    public int getLatitudeE6() {
+        return (int)(mCurrentLatitude*1E6);
+    }
+
     public void setCurrentLatLng(LatLng latLng){
         this.mCurrentLatitude = latLng.latitude;
         this.mCurrentLongitude = latLng.longitude;
@@ -70,6 +75,10 @@ public class ShakePointPOJO {
 
     public double getCurrentLongitude() {
         return mCurrentLongitude;
+    }
+
+    public int getLongitudeE6() {
+        return (int)(mCurrentLongitude*1E6);
     }
 
     public void setCurrentLongitude(double currentLongitude) {
@@ -221,5 +230,33 @@ public class ShakePointPOJO {
 
     public void setRouteId(int routeId) {
         this.mRouteId = routeId;
+    }
+
+    @Override
+    public ShakePointPOJO sumValue(ShakePointPOJO shakePointPOJO) {
+        this.mAxisAccelerationX += shakePointPOJO.getAxisAccelerationX();
+        this.mAxisAccelerationY += shakePointPOJO.getAxisAccelerationY();
+        this.mAxisAccelerationZ += shakePointPOJO.getAxisAccelerationZ();
+
+        return this;
+    }
+
+    @Override
+    public ShakePointPOJO subValue(ShakePointPOJO shakePointPOJO) {
+        this.mAxisAccelerationX -= shakePointPOJO.getAxisAccelerationX();
+        this.mAxisAccelerationY -= shakePointPOJO.getAxisAccelerationY();
+        this.mAxisAccelerationZ -= shakePointPOJO.getAxisAccelerationZ();
+
+        return this;
+    }
+
+    @Override
+    public ShakePointPOJO divValue(int divisor) {
+
+        this.mAxisAccelerationX /= divisor;
+        this.mAxisAccelerationY /= divisor;
+        this.mAxisAccelerationZ /= divisor;
+
+        return this;
     }
 }

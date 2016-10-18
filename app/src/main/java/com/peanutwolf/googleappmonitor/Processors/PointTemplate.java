@@ -8,9 +8,9 @@ import java.util.List;
 /**
  * Created by vigursky on 27.09.2016.
  */
-public abstract class PointTemplate<T> implements SaveStrategy {
+public abstract class PointTemplate<T extends AverageProcessor<T>> implements SaveStrategy {
     private static final int DELTA_BANDWIDTH_DEFAULT = 3;
-    protected List<T> mTimelinePoints;
+    protected RangedLinkedList<T> mTimelinePoints;
 
     protected PointTemplate(int bandwidth){
         mTimelinePoints = new RangedLinkedList<>(bandwidth);

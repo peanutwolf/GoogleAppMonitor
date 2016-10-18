@@ -13,25 +13,47 @@ public class ShakePointProcessor extends PointTemplate<ShakePointPOJO>{
         FALLING
     }
 
+    public ShakePointProcessor(int bandwidth){
+        super(bandwidth);
+    }
+
     Direction mFunctionSign = Direction.EQUALS;
 
     @Override
     protected int calculateDelta() {
         int delta = 1;
         int last = this.mTimelinePoints.size() - 1;
+        double prevAccelValue;
+        double currAccelValue;
 
         if(this.mTimelinePoints.size() <= 1)
             return 1;
 
-        if(this.mTimelinePoints.get(last-1).getAccelerationValue() < this.mTimelinePoints.get(last).getAccelerationValue()){
+        ShakePointPOJO averagePoint = mTimelinePoints.getAverageType();
+
+        double max = averagePoint.getAxisAccelerationX();
+        prevAccelValue = this.mTimelinePoints.get(last-1).getAxisAccelerationX();
+        currAccelValue = this.mTimelinePoints.get(last).getAxisAccelerationX();
+        if (max < averagePoint.getAxisAccelerationY()){
+            max = averagePoint.getAxisAccelerationY();
+            prevAccelValue = this.mTimelinePoints.get(last-1).getAxisAccelerationY();
+            currAccelValue = this.mTimelinePoints.get(last).getAxisAccelerationY();
+        }
+        if (max < averagePoint.getAxisAccelerationZ()){
+            //max = averagePoint.getAxisAccelerationZ();
+            prevAccelValue = this.mTimelinePoints.get(last-1).getAxisAccelerationZ();
+            currAccelValue = this.mTimelinePoints.get(last).getAxisAccelerationZ();
+        }
+
+        if(prevAccelValue < currAccelValue){
             if(mFunctionSign == Direction.GROWING)
                 delta = 0;
             mFunctionSign = Direction.GROWING;
-        }else if(this.mTimelinePoints.get(last-1).getAccelerationValue() > this.mTimelinePoints.get(last).getAccelerationValue()){
+        }else if(prevAccelValue > currAccelValue){
             if(mFunctionSign == Direction.FALLING)
                 delta = 0;
             mFunctionSign = Direction.FALLING;
-        }else if(this.mTimelinePoints.get(last-1).getAccelerationValue() == this.mTimelinePoints.get(last).getAccelerationValue()){
+        }else if(prevAccelValue == currAccelValue){
             mFunctionSign = Direction.EQUALS;
             delta = 0;
         }
